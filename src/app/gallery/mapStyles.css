@@ -1,0 +1,26 @@
+/* Styles for the main map container */
+.map-container {
+  height: 100%;
+  width: 100%;
+  background-color: #f0f0f0; /* Optional: A background color while tiles load */
+}
+
+/*
+Styles for the custom Leaflet labels pane.
+Leaflet creates panes with class names like 'leaflet-<paneName>-pane'.
+Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
+*/
+.leaflet-labels-pane {
+  z-index: 650; /* Ensure labels are above GeoJSON highlights */
+  pointer-events: none; /* Labels should not intercept mouse events */
+}
+
+/*
+  Note on GeoJSON feature styling (like countries):
+  Leaflet's L.Path options (fillColor, weight, opacity, etc.) are typically applied
+  via JavaScript objects passed to layer.setStyle() or as options during GeoJSON creation.
+  While SVG elements (which Leaflet uses for GeoJSON) can be styled with CSS,
+  Leaflet's direct JS API for styling these paths is often more straightforward
+  and powerful for dynamic updates. The HIGHLIGHT_STYLE and INITIAL_GEOJSON_STYLE
+  objects in the JavaScript code serve this purpose.
+*/
