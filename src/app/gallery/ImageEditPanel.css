@@ -1,0 +1,524 @@
+/* ImageEditPanel.css - Right-Aligned Full-Height Floating Panel REFINED */
+
+/* --- Overlay --- */
+.slide-panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+    z-index: 1999;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.slide-panel-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease-in-out;
+}
+
+/* --- Floating Panel (Right Aligned, Full Height) --- */
+.slide-panel {
+    background-color: #ffffff;
+    width: 450px;
+    max-width: 100%;
+    height: calc(100vh - 40px);
+    border-radius: 16px; /* Increased radius for a more "card" feel */
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18), 0 7px 12px rgba(0,0,0,0.12); /* Enhanced shadow */
+    display: flex;
+    flex-direction: column;
+    position: relative; /* Crucial for absolute positioning children like close and edit button */
+    overflow: hidden; /* Ensures image corners are clipped by panel's border-radius */
+
+    opacity: 0;
+    transform: translateX(30px) scale(0.98);
+    transition: opacity 0.25s ease-out, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.slide-panel.open {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+/* --- Close Button --- */
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.6); /* Brighter for better visibility on image */
+    backdrop-filter: blur(3px); /* Frosted glass effect if image is behind */
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    line-height: 32px;
+    text-align: center;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    z-index: 10; /* Above image and content */
+}
+
+.close-button:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+}
+
+/* --- Panel Content (shared styling) --- */
+.panel-content {
+    /* Top padding is now effectively handled by image container or elements below it */
+    padding: 0 25px 25px 25px;
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* For stacking context if needed */
+     -ms-overflow-style: none;
+
+    /* For Firefox */
+    scrollbar-width: none;
+}
+
+/* ======================= DISPLAY MODE ======================= */
+.panel-display-mode {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    flex-grow: 1; /* Allow display mode to fill space for bottom-aligned button */
+    position: relative; /* For positioning elements within if needed, though FAB is relative to panel */
+}
+
+/* Full-width Image Container */
+.panel-display-mode .image-container {
+    width: calc(100% + 50px); /* Span full panel width, breaking out of panel-content padding */
+    margin-left: -25px; /* Align with left edge of panel */
+    margin-right: -25px; /* Align with right edge of panel */
+    margin-top: 0; /* Start at the very top of panel-content (which has no top padding now) */
+    height: 300px; /* SIGNIFICANTLY LARGER IMAGE HEIGHT */
+    overflow: hidden; /* Not strictly needed if panel has overflow:hidden, but good practice */
+    /* No border-radius here; panel's overflow:hidden will clip it */
+}
+
+.panel-display-mode .panel-image-large {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Content below the image */
+.panel-display-mode .text-content-area {
+    padding-top: 20px; /* Space between full-width image and the text */
+    /* This div would wrap H1, H3, details-group, panel-long-lat if you want them scrolled together
+       but separate from a fixed image. If image scrolls with content, this div is not strictly needed.
+       For now, assume H1 etc. are direct children of panel-display-mode after image-container. */
+}
+
+
+.panel-display-mode h1 {
+    font-size: 2em;
+    font-weight: 700; /* Bolder */
+    color: #1a2c3b; /* Darker, richer blue */
+    margin-top: 20px; /* Space after the image */
+    margin-bottom: 8px;
+    line-height: 1.2;
+}
+
+.panel-display-mode h3 { /* Description */
+    font-size: 1em;
+    font-weight: 400;
+    color: #5a6877; /* Softer description color */
+    margin-top: 0;
+    margin-bottom: 24px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
+.panel-display-mode .details-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    color: #4a5568; /* Tailwind-ish gray */
+    padding: 12px 0;
+    border-top: 1px solid #e2e8f0;
+}
+.panel-display-mode .details-group p { margin: 0; }
+
+.panel-display-mode .panel-long-lat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    color: #4a5568;
+    padding: 12px 0;
+    margin-bottom: 20px; /* Less margin if edit button is FAB */
+    border-bottom: 1px solid #e2e8f0;
+}
+.panel-display-mode .panel-long-lat p { margin: 0; }
+
+.panel-display-mode .details-group strong,
+.panel-display-mode .panel-long-lat strong {
+    color: #2d3748;
+    margin-right: 8px;
+}
+
+/* Edit (Pencil) Button - Floating Action Button style */
+/* Removed from .panel-actions div. Now positioned absolutely to .slide-panel */
+.edit-pencil-button {
+    position: absolute; /* Relative to .slide-panel */
+    bottom: 25px;
+        right: 85px; /* 25px (edit button's right) + 50px (edit button's width) + 10px (gap) */
+
+    background: #3498db;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px; /* Larger FAB */
+    height: 50px; /* Larger FAB */
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 5; /* Above most content */
+}
+
+.edit-pencil-button:hover {
+    background-color: #2980b9;
+    transform: scale(1.05); /* Slight lift effect */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+.edit-pencil-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Hide the old panel-actions div in display mode if it's still in JSX */
+.panel-display-mode .panel-actions {
+    display: none;
+}
+
+/* ImageEditPanel.css - CONTINUED */
+
+/* panel-content already has top padding to clear the close button */
+/* panel-content {
+    padding: 50px 25px 25px 25px;
+    ...
+} */
+
+/* ======================= EDIT MODE - Image Preview Full Width ======================= */
+.panel-edit-mode {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.panel-edit-mode form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    width: 100%;
+}
+
+/* Full-width Image Preview Container for Edit Mode */
+.panel-edit-mode .form-image-preview-container {
+     width: calc(100% + 50px); /* Span full panel width, breaking out of panel-content padding */
+    margin-left: -25px; /* Align with left edge of panel */
+    margin-right: -25px; /* Align with right edge of panel */
+    margin-top: 0; /* Start at the very top of panel-content (which has no top padding now) */
+    height: 300px; /* SIGNIFICANTLY LARGER IMAGE HEIGHT */
+    overflow: hidden; /* Not strictly needed if panel has overflow:hidden, but good practice */
+    /* No border-radius here; panel's overflow:hidden will clip it */
+}
+
+.panel-edit-mode .form-image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the container */
+    /* No box-shadow if it's meant to be a seamless top part */
+}
+
+/* Adjust title margin to account for the new image position */
+.panel-edit-mode h3 {
+    font-size: 1.5em;
+    color: #1a2c3b;
+    /* margin-top is now handled by image's margin-bottom or direct spacing */
+    margin-bottom: 30px;
+    text-align: center;
+    font-weight: 600;
+}
+
+
+/* Existing styles for form-group, label, input, location-input-group, etc.,
+   should largely remain the same. Ensure they fit well visually after the
+   larger image. */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    color: #3d4852;
+    margin-bottom: 7px;
+    font-size: 0.875em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="url"] {
+    width: 100%;
+    padding: 11px 15px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 0.95em;
+    background-color: #f7fafc;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="url"]:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+    background-color: #fff;
+}
+
+/* Location Input Group Styling (from previous step) */
+.location-input-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.coordinates-text {
+    font-size: 0.9em;
+    color: #495057;
+    display: flex;
+    gap: 15px;
+}
+
+.coordinates-text span {
+    white-space: nowrap;
+}
+
+.pick-location-icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.6em;
+    color: #007bff;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.pick-location-icon-btn:hover {
+    color: #0056b3;
+    transform: scale(1.1);
+}
+
+/* Panel Actions (Save/Cancel) at the bottom */
+.panel-edit-mode .panel-actions {
+    margin-top: auto; /* Pushes to the bottom */
+    padding-top: 20px;
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+/* ... (rest of your .panel-actions button styling remains the same) ... */
+.panel-edit-mode .panel-actions button {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.panel-edit-mode .panel-actions button.primary {
+    background-color: #2ecc71;
+    color: white;
+}
+.panel-edit-mode .panel-actions button.primary:hover {
+    background-color: #27ae60;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+    transform: translateY(-1px);
+}
+
+.panel-edit-mode .panel-actions button.secondary {
+    background-color: #f1f5f9;
+    color: #4a5568;
+}
+.panel-edit-mode .panel-actions button.secondary:hover {
+    background-color: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.panel-edit-mode .panel-actions button:active {
+    transform: translateY(0px) scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* ImageEditPanel.css - CONTINUED */
+
+/* ... existing styles ... */
+
+/* Styling for the new Delete (Trash) Button FAB */
+.delete-trash-button {
+    position: absolute;
+    bottom: 25px;
+    /* Position it to the left of the edit button */
+    /* Assuming edit button is 50px wide and right: 25px, plus 10px gap */
+    right: 23px; /* 25px (edit button's right) + 50px (edit button's width) + 10px (gap) */
+    background: #00000f; /* Red for delete */
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 22px; /* Adjust for trash icon size */
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 5; /* Same level as edit button, or slightly lower if desired */
+}
+
+.delete-trash-button:hover {
+    background-color: #c0392b; /* Darker red */
+    transform: scale(1.05);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.delete-trash-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Confirmation Dialog Styles */
+.confirm-delete-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.65); /* Darker overlay for focus */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100; /* Above other panel content and FABs */
+    /* Ensure it respects panel's border radius if it's the same size */
+    border-radius: inherit; /* Inherit from .slide-panel if needed */
+}
+
+.confirm-delete-dialog {
+    background-color: #fff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+    width: 79%;
+    max-width: 380px; /* Max width for the dialog */
+    animation: fadeInDialog 0.2s ease-out;
+}
+
+.confirm-delete-dialog p {
+    font-size: 1.1em;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.confirm-delete-actions {
+    display: flex;
+    justify-content: space-evenly; /* Or center with gap */
+    gap: 15px;
+}
+
+.confirm-delete-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    min-width: 100px; /* Ensure buttons have a decent min width */
+}
+
+.confirm-delete-actions .button-danger {
+    background-color: #e74c3d; /* Red */
+    color: white;
+}
+.confirm-delete-actions .button-danger:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+}
+
+.confirm-delete-actions .button-secondary {
+    background-color: #ecf0f1; /* Light grey */
+    color: #34495e;
+    /* border: 1px solid #bdc3c7; */ /* Optional border */
+}
+.confirm-delete-actions .button-secondary:hover {
+    background-color: #dadedf;
+    transform: translateY(-1px);
+}
+
+@keyframes fadeInDialog {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Adjust FAB positioning on smaller screens if needed */
+@media (max-width: 520px) {
+    .delete-trash-button {
+        right: 70px; /* Adjust spacing from edit button */
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        bottom: 15px; /* Match edit button's bottom */
+    }
+    /* Ensure edit button is also adjusted if not already */
+    .edit-pencil-button { /* From previous CSS */
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        bottom: 15px;
+        right: 15px;
+    }
+}

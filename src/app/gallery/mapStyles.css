@@ -2,7 +2,6 @@
 .map-container {
   height: 100%;
   width: 100%;
-  background-color: #f0f0f0; /* Optional: A background color while tiles load */
 }
 
 /*
@@ -10,10 +9,6 @@ Styles for the custom Leaflet labels pane.
 Leaflet creates panes with class names like 'leaflet-<paneName>-pane'.
 Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
 */
-.leaflet-labels-pane {
-  z-index: 650; /* Ensure labels are above GeoJSON highlights */
-  pointer-events: none; /* Labels should not intercept mouse events */
-}
 
 /*
   Note on GeoJSON feature styling (like countries):
@@ -24,3 +19,141 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
   and powerful for dynamic updates. The HIGHLIGHT_STYLE and INITIAL_GEOJSON_STYLE
   objects in the JavaScript code serve this purpose.
 */
+/* In mapStyles.css */
+/* In your mapStyles.css */
+
+.custom-map-image-icon.polaroid-style {
+  background-color: white;
+  border: 1px solid #ccc; /* Light grey border for the polaroid */
+  padding: 10px; /* Space between the image and the polaroid edge */
+  padding-bottom: 40px; /* Larger bottom padding for text and the pin */
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2); /* Optional: adds a subtle shadow */
+  border-radius: 3px; /* Slightly rounded corners */
+  position: relative; /* Needed for positioning the pin and text */
+  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+}
+
+/* Styling for the actual image inside the polaroid container */
+.custom-map-image-icon.polaroid-style img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the area, might crop */
+  border: 1px solid #eee; /* Optional: a very light border around the image itself */
+}
+
+/* Style for the "pin" - using a pseudo-element */
+/* Style for the text (country name) - using a pseudo-element */
+.custom-map-image-icon.polaroid-style::after {
+  content: attr(data-country-name); /* Will pull text from a data attribute */
+  position: absolute;
+  bottom: 10px; /* Position at the bottom of the padding */
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: 'Arial', sans-serif; /* Choose a suitable font */
+  color: #333;
+  font-size: 14px;
+  font-style: italic; /* If you want italic text like in the example */
+}
+
+/*
+  Adjust the Leaflet icon pane so that our custom content (like the pin)
+  isn't clipped if it extends outside the icon's original bounds.
+*/
+.leaflet-marker-icon {
+  overflow: visible !important;
+}
+
+/* In mapStyles.css */
+/* ... other styles ... */
+/* In mapStyles.css or your global stylesheet */
+.custom-map-marker-wrapper {
+    /* background-color: rgba(0, 255, 0, 0.1); /* For debugging iconSize area */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align paper to the top (considering pin space) */
+}
+
+/* In mapStyles.css or your global styles */
+
+.leaflet-polaroid-marker-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    -webkit-backface-visibility: hidden; /* Improve rendering during transforms */
+    backface-visibility: hidden;
+}
+
+.map-marker-polaroid-outer-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.map-marker-polaroid-card {
+    /* width, height, paddings, margin-top are set by inline styles */
+    background-color: #fefefe; /* Slightly off-white for aged paper */
+    border: 1px solid #cacaca;
+    box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3), -1px -1px 3px rgba(255,255,255,0.5); /* More distinct shadow */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    transform: rotate(-3.5deg); /* Default tilt */
+    transition: transform 0.1s ease-out; /* Smooth transform on hover */
+}
+
+.leaflet-polaroid-marker-wrapper:hover .map-marker-polaroid-card {
+    transform: rotate(-1deg) scale(1.05); /* Slight un-tilt and scale up on hover */
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+.map-marker-polaroid-pin {
+    /* font-size and top are set by inline styles */
+    color: #444;
+    position: absolute;
+    left: 55%;
+    transform: translateX(-50%) rotate(10deg);
+    z-index: 10;
+    pointer-events: none;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2); /* Subtle shadow for pin */
+}
+
+.map-marker-polaroid-image {
+    /* width, height, background-image, border-width are set by inline styles */
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-style: solid;
+    border-color: #e0e0e0; /* Subtle border for the photo itself */
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.08);
+}
+
+.map-marker-polaroid-caption {
+    /* height, margin-top are set by inline styles */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 1px 0; /* Minimal vertical padding */
+    background-color: transparent; /* Caption is on the same paper */
+}
+
+.map-marker-caption-text {
+    /* font-size is set by inline styles */
+    font-family: 'Caveat', cursive; /* Ensure handwritten font is loaded */
+    color: #3a3a3a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 3px;
+    margin: 0;
+    line-height: 1.1; /* Adjust for better fit with dynamic font size */
+    max-width: 100%;
+}
