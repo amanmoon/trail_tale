@@ -301,3 +301,66 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
 .search-back-button-gm svg {
     font-size: 18px;
 }
+
+/*
+  Styles for the map actions overlay and the "Add New Image" button.
+  This aims for a Google Material Design-inspired Floating Action Button (FAB) look.
+*/
+
+/* Container for action buttons like the "Add New Image" button */
+.map-actions-overlay {
+  position: absolute; /* Positioned relative to its nearest positioned ancestor (e.g., the map container or a page wrapper) */
+  top: 20px;          /* Distance from the top. Adjust if you have a search bar or other elements above it. */
+                     /* For example, if your search bar is 60px tall and also at the top, you might use top: 80px; */
+  right: 20px;         /* Distance from the right */
+  z-index: 1050;       /* Ensures it's above map elements and potentially other simple overlays. */
+                     /* Panels/Modals should have a higher z-index (e.g., 2000+). */
+  display: flex;       /* Enables easy alignment if more buttons are added here later */
+  flex-direction: column; /* Stack multiple buttons vertically if needed */
+  gap: 10px;           /* Space between multiple buttons if any */
+}
+
+/* Base styles that might be shared by other overlay buttons, if any.
+   The .add-new-image-button will override/extend these for its specific look. */
+.map-overlay-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0; /* Reset padding, size will be controlled by width/height for circular buttons */
+  background-color: #ffffff; /* Default white background */
+  border: none;             /* FABs are typically borderless */
+  cursor: pointer;
+  color: #5f6368; /* Google's standard dark grey icon color */
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+/* Specific styles for the circular "Add New Image" button */
+.add-new-image-button {
+  width: 48px;  /* Standard FAB diameter */
+  height: 48px; /* Standard FAB diameter */
+  border-radius: 24px; /* This makes the button circular */
+  /* Google Material Design shadow for FABs */
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  font-size: 24px; /* Adjust the size of the FaPlus icon. Default is often 1em (16px). */
+}
+
+.add-new-image-button:hover {
+  background-color: #f8f9fa; /* A very light grey, common for hover states in Google UIs */
+  /* Slightly more pronounced shadow on hover */
+  box-shadow: 0 6px 12px rgba(0,0,0,0.18), 0 4px 8px rgba(0,0,0,0.25);
+}
+
+.add-new-image-button:active {
+  background-color: #f1f3f4; /* Slightly darker for pressed state */
+  /* Shadow might reduce slightly or change to simulate being pressed */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.20);
+  transform: translateY(1px); /* Gives a subtle "pressed down" effect */
+}
+
+.add-new-image-button:disabled {
+  background-color: #f1f3f4; /* Greyed out background for disabled state */
+  color: #bdc1c6;          /* Lighter icon color when disabled */
+  box-shadow: none;         /* No shadow when disabled, appears flat */
+  cursor: not-allowed;
+  transform: none;          /* No press effect when disabled */
+}

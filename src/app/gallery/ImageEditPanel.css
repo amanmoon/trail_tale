@@ -131,7 +131,7 @@
     font-weight: 700; /* Bolder */
     color: #1a2c3b; /* Darker, richer blue */
     margin-top: 20px; /* Space after the image */
-    margin-bottom: 8px;
+    margin-bottom: 7px;
     line-height: 1.2;
 }
 
@@ -255,12 +255,11 @@
 }
 
 /* Adjust title margin to account for the new image position */
-.panel-edit-mode h3 {
-    font-size: 1.5em;
+.panel-edit-mode h4 {
+    font-size: large;
     color: #1a2c3b;
-    /* margin-top is now handled by image's margin-bottom or direct spacing */
-    margin-bottom: 30px;
-    text-align: center;
+    margin-top: 0;
+    margin-bottom: 15px;
     font-weight: 600;
 }
 

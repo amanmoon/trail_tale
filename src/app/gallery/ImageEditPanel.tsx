@@ -1,27 +1,27 @@
 // src/ImageEditPanel.tsx
 
 import React, { useState, useEffect, useRef } from 'react';
-import type { ImageInfo } from './imageMarkerUtils';
+import type { ImageInfo } from './imageMarkerUtils'; // Assuming ImageInfo is { id, lat, lng, url, ... }
 import { FaEdit, FaTrash } from 'react-icons/fa';
 
 // import './ImageEditPanel.css'; // Ensure styles are imported
 
 // Define the shape of the data passed up
-interface CurrentPanelFormData {
+export interface CurrentPanelFormData { // Ensure this is exported
     caption: string;
     url: string;
+    date: string;
+    description?: string; // Add description if it's part of the form data to preserve
 }
 
 interface ImageEditPanelProps {
-    imageInfo: ImageInfo;
+    imageInfo: ImageInfo; // This will be newImageDraft when adding new
     onSave: (updatedImageInfo: ImageInfo) => void;
     onClose: () => void;
     isOpen: boolean;
-    onStartPickLocation: (currentFormData: CurrentPanelFormData) => void; // MODIFIED PROP
-    onDelete: (imageId: string) => void; // <<<< NEW PROP
+    onStartPickLocation: (currentFormData: CurrentPanelFormData) => void;
+    onDelete: (imageId: string) => void;
 }
-// src/ImageEditPanel.tsx
-// ... imports ...
 
 export function ImageEditPanel({
     imageInfo,
@@ -29,66 +29,56 @@ export function ImageEditPanel({
     onClose,
     isOpen,
     onStartPickLocation,
-    onDelete, // <<<< Destructure new prop
+    onDelete,
 }: ImageEditPanelProps) {
     const [isEditing, setIsEditing] = useState(false);
-    const [url, setUrl] = useState(imageInfo?.url || ''); // Use optional chaining
-    const [date, setDate] = useState(String(imageInfo?.date || ''));
-    // const [lng, setLng] = useState(String(imageInfo?.lng || '')); // No longer directly used for input
-    // const [currentLng, setCurrentLng] = useState<string>(imageInfo?.lng?.toFixed(4) || 'N/A'); // From previous JSX
-    // const [currentLat, setCurrentLat] = useState<string>(imageInfo?.lat?.toFixed(4) || 'N/A'); // From previous JSX
-    const [caption, setCaption] = useState(imageInfo?.caption || imageInfo?.country || '');
-    const [description, setDescription] = useState(imageInfo?.description || '');
-    const editingImageRef = useRef<ImageInfo | null>(null);
+    const [url, setUrl] = useState('');
+    const [date, setDate] = useState('');
+    const [caption, setCaption] = useState('');
+    const [description, setDescription] = useState('');
+    const editingImageRef = useRef<ImageInfo | null>(null); // To track if imageInfo prop instance changes
 
-    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false); // <<<< NEW STATE
+    const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
-    // Effect to initialize/reset form fields based on imageInfo and isOpen
     useEffect(() => {
         if (isOpen) {
-            const currentImage = imageInfo; // Use a local const for clarity
-            if (currentImage && currentImage.id !== "NEW_IMAGE_TEMP_ID") { // Existing image
+            const currentImage = imageInfo; // imageInfo is the prop from GalleryPage
+            if (currentImage) {
                 setUrl(currentImage.url || '');
                 setCaption(currentImage.caption || currentImage.country || '');
                 setDescription(currentImage.description || '');
-                setDate(String(currentImage.date || ''));
-                // setCurrentLng(currentImage.lng?.toFixed(4) || 'N/A');
-                // setCurrentLat(currentImage.lat?.toFixed(4) || 'N/A');
-                if (editingImageRef.current?.id !== currentImage.id || !isEditing) { // Reset to display if different image or not already editing
-                     setIsEditing(false);
-                }
-            } else { // New image placeholder, or if imageInfo is null
-                const defaultDate = new Date().toISOString().split('T')[0];
-                setUrl(currentImage?.url || '');
-                setCaption(currentImage?.caption || '');
-                setDescription(currentImage?.description || '');
-                setDate(String(currentImage?.date || defaultDate));
-                // setCurrentLng(currentImage?.lng && currentImage.lng !== 0 ? currentImage.lng.toFixed(4) : 'Pick location');
-                // setCurrentLat(currentImage?.lat && currentImage.lat !== 0 ? currentImage.lat.toFixed(4) : 'Pick location');
-                setIsEditing(true); // Start in edit mode for a new image
-            }
-            editingImageRef.current = currentImage;
-        } else {
-             // Reset showDeleteConfirm when panel closes, regardless of how
-            setShowDeleteConfirm(false);
-        }
-    }, [imageInfo, isOpen, isEditing]); // isEditing added to deps for specific reset scenarios
+                // For a new image, date might be pre-filled by GalleryPage, or use current if not set
+                setDate(String(currentImage.date || (currentImage.id === "NEW_IMAGE_TEMP_ID" ? new Date().toISOString().split('T')[0] : '')));
 
+                // Determine edit mode only when the panel opens for a *different* image or for the first time.
+                // This prevents toggling edit mode if lat/lng updates for the same image.
+                if (!editingImageRef.current || editingImageRef.current.id !== currentImage.id || (editingImageRef.current.id === currentImage.id && !isEditing && currentImage.id !== "NEW_IMAGE_TEMP_ID") ) {
+                     setIsEditing(currentImage.id === "NEW_IMAGE_TEMP_ID" || !currentImage.url); // Start editing for new or if no URL (implies new)
+                }
+                editingImageRef.current = currentImage;
+            }
+        } else {
+            // Reset when panel closes
+            setShowDeleteConfirm(false);
+            // Consider resetting editingImageRef.current = null if panel closes completely
+            // so that next open behaves like a fresh open.
+            editingImageRef.current = null;
+        }
+    }, [imageInfo, isOpen]); // Removed isEditing from deps
 
     useEffect(() => {
         if (!isOpen) {
-            setIsEditing(false);
-            // setShowDeleteConfirm(false); // Also reset here if panel is closed externally
+            setIsEditing(false); // Ensure edit mode is off when panel is not open
+            setShowDeleteConfirm(false);
         }
     }, [isOpen]);
 
 
     const handleEditClick = () => {
-        // ... (your existing handleEditClick logic)
-        if (imageInfo) {
+        if (imageInfo) { // imageInfo should be valid if this button is visible
+            // Populate form fields from imageInfo if not already done by useEffect
             setUrl(imageInfo.url || '');
             setDate(String(imageInfo.date || ''));
-            // setLng(String(imageInfo.lng)); // Not directly used for controlled input
             setCaption(imageInfo.caption || imageInfo.country || '');
             setDescription(imageInfo.description || '');
             setIsEditing(true);
@@ -96,65 +86,62 @@ export function ImageEditPanel({
     };
 
     const handleCancelEdit = () => {
-        // ... (your existing handleCancelEdit logic)
-         if (imageInfo && imageInfo.id !== "NEW_IMAGE_TEMP_ID") {
+         if (imageInfo && imageInfo.id !== "NEW_IMAGE_TEMP_ID") { // If editing an existing image
             setIsEditing(false);
-            // Re-populate from imageInfo to discard edits
+            // Re-populate from imageInfo to discard edits (useEffect should also handle this if imageInfo didn't change)
             setUrl(imageInfo.url || '');
             setCaption(imageInfo.caption || imageInfo.country || '');
             setDescription(imageInfo.description || '');
             setDate(String(imageInfo.date || ''));
-        } else {
-            onClose(); // If it was a new image form, cancel closes it
+        } else { // If it was a new image form, cancel means close the panel
+            onClose();
         }
     };
 
     const handleSubmit = (e: React.FormEvent) => {
-        // ... (your existing handleSubmit logic)
         e.preventDefault();
-        // Guard against imageInfo possibly being null if logic allows
-        if (!imageInfo) {
-            console.error("Attempted to save without imageInfo.");
-            return;
-        }
+        if (!imageInfo) return;
+
         const updatedImageDetails: ImageInfo = {
-            ...imageInfo,
+            ...imageInfo, // This includes id, lat, lng
             url: url,
             date: date,
             caption: caption,
-            description: description
+            description: description,
         };
-        onSave(updatedImageDetails);
-        setIsEditing(false);
+        onSave(updatedImageDetails); // GalleryPage handles logic (add new vs update existing)
+        // Don't setIsEditing(false) here if onSave itself closes the panel,
+        // but if it's for adding a new image and location is missing, GalleryPage keeps it open.
+        // If successfully saved, GalleryPage will close the new image panel.
+        // If successfully saved an edit, GalleryPage will close the edit panel.
     };
 
     const handlePickLocationFromMapClick = () => {
-        // ... (your existing handlePickLocationFromMapClick logic)
-         onStartPickLocation({ caption: caption, url: url});
+        // Call prop with current form values
+        onStartPickLocation({ caption, url, date, description });
     };
 
-    // --- Handlers for Delete Functionality ---
-    const handleDeleteInitiate = () => {
-        setShowDeleteConfirm(true);
-    };
-
+    const handleDeleteInitiate = () => setShowDeleteConfirm(true);
     const handleConfirmDelete = () => {
         if (imageInfo) {
-            onDelete(imageInfo.id); // Call parent's delete handler
+            onDelete(imageInfo.id);
             setShowDeleteConfirm(false);
-            onClose(); // Close the panel after deletion
+            onClose(); // Close panel after deletion
         }
     };
+    const handleCancelDelete = () => setShowDeleteConfirm(false);
 
-    const handleCancelDelete = () => {
-        setShowDeleteConfirm(false);
-    };
-    // --- End Delete Handlers ---
-
-    // Fallbacks for display, using imageInfo directly as it's the source of truth for display
     const displayImageUrl = imageInfo?.url || '';
     const displayCaption = imageInfo?.caption || imageInfo?.country || (imageInfo?.id === "NEW_IMAGE_TEMP_ID" ? "New Image" : 'Untitled Image');
     const displayDescription = imageInfo?.description || '';
+
+    // For displaying Lat/Lng in edit mode
+    const currentLatDisplay = (imageInfo?.lat === 0 && imageInfo?.lng === 0 && imageInfo.id === "NEW_IMAGE_TEMP_ID")
+        ? "Pick Location"
+        : imageInfo?.lat?.toFixed(4) || "N/A";
+    const currentLngDisplay = (imageInfo?.lat === 0 && imageInfo?.lng === 0 && imageInfo.id === "NEW_IMAGE_TEMP_ID")
+        ? "Pick Location"
+        : imageInfo?.lng?.toFixed(4) || "N/A";
 
 
     return (
@@ -163,8 +150,7 @@ export function ImageEditPanel({
                 <button className="close-button" onClick={onClose} aria-label="Close panel">&times;</button>
 
                 <div className="panel-content">
-                    {/* ===================== DISPLAY MODE ===================== */}
-                    {!isEditing && imageInfo && (
+                    {!isEditing && imageInfo && imageInfo.id !== "NEW_IMAGE_TEMP_ID" && (
                         <div className="panel-display-mode">
                             <div className="image-container">
                                 <img
@@ -187,28 +173,26 @@ export function ImageEditPanel({
                         </div>
                     )}
 
-                    {/* ===================== EDIT MODE ===================== */}
-                    {isEditing && ( // Removed imageInfo check here, assuming if isEditing, imageInfo (or placeholder) is set
+                    {isEditing && imageInfo && ( // imageInfo must exist if editing
                         <div className="panel-edit-mode">
-                            {(url || (imageInfo && imageInfo.url)) && (
+                            {(url || imageInfo.url) && (
                                 <div className="form-group form-image-preview-container">
-                                    <img /* ... preview image props ... */
-                                        src={url || (imageInfo && imageInfo.url) || ""}
+                                    <img
+                                        src={url || imageInfo.url || ""}
                                         alt="Preview"
                                         className="form-image-preview"
-                                        onError={(e) => { /* ... */ }}
-                                        onLoad={(e) => { /* ... */ }}
+                                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }}
+                                        onLoad={(e) => { (e.currentTarget as HTMLImageElement).style.display = 'block'; }}
                                     />
                                 </div>
                             )}
-                            {!url && !(imageInfo && imageInfo.url) && ( /* Placeholder for no image URL */
-                                <div className="form-group form-image-preview-container" style={{ display: 'flex', /* ... */ }}>
-                                    <span>No image URL provided</span>
+                            {!url && !imageInfo.url && (
+                                <div className="form-group form-image-preview-container" style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '150px', border: '1px dashed #ccc' }}>
+                                    <span>Image preview once URL is entered</span>
                                 </div>
                             )}
-                            <h3>{imageInfo && imageInfo.id === "NEW_IMAGE_TEMP_ID" ? "Add New Image Details" : "Edit Image Details"}</h3>
+                            <h4>{imageInfo.id === "NEW_IMAGE_TEMP_ID" ? "Add New Image Details" : "Edit Image Details"}</h4>
                             <form onSubmit={handleSubmit}>
-                                {/* ... your form groups for URL, Caption, Description, Date ... */}
                                 <div className="form-group">
                                     <label htmlFor="imageUrl">Image URL:</label>
                                     <input type="url" id="imageUrl" value={url} onChange={(e) => setUrl(e.target.value)} required />
@@ -219,60 +203,43 @@ export function ImageEditPanel({
                                 </div>
                                 <div className="form-group">
                                     <label htmlFor="imageDescription">Description:</label>
-                                    <textarea id="imageDescription" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={300} rows={4} style={{ width: '100%', /*...*/ }}/>
+                                    <textarea id="imageDescription" value={description} onChange={(e) => setDescription(e.target.value)} maxLength={300} rows={4} style={{ width: '100%', resize: 'vertical' }}/>
                                 </div>
                                 <div className="form-group">
-                                    <label htmlFor="imageDate">Date:</label>
-                                    <input type="text" id="imageDate" value={date} onChange={(e) => setDate(e.target.value)} pattern="\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])" required />
+                                    <label htmlFor="imageDate">Date (YYYY-MM-DD):</label>
+                                    <input type="text" id="imageDate" value={date} onChange={(e) => setDate(e.target.value)} pattern="\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12]\d|3[01])" placeholder="YYYY-MM-DD" required />
                                 </div>
 
                                 <div className="form-group">
                                     <label htmlFor="locationDisplayGroup">Location (Lon, Lat)</label>
                                     <div className="location-input-group" id="locationDisplayGroup">
                                         <div className="coordinates-text">
-                                            <span>Lon: {imageInfo?.lng?.toFixed(4) || 'N/A'}</span>
-                                            <span>Lat: {imageInfo?.lat?.toFixed(4) || 'N/A'}</span>
+                                            <span>Lon: {currentLngDisplay}</span>
+                                            <span>Lat: {currentLatDisplay}</span>
                                         </div>
                                         <button type="button" onClick={handlePickLocationFromMapClick} className="pick-location-icon-btn" aria-label="Pick location" title="Pick location">📍</button>
                                     </div>
                                 </div>
                                 <div className="panel-actions">
-                                    <button type="submit" className="primary">{imageInfo && imageInfo.id === "NEW_IMAGE_TEMP_ID" ? "Add Image" : "Save Changes"}</button>
+                                    <button type="submit" className="primary">{imageInfo.id === "NEW_IMAGE_TEMP_ID" ? "Add Image" : "Save Changes"}</button>
                                     <button type="button" onClick={handleCancelEdit} className="secondary">Cancel</button>
                                 </div>
                             </form>
                         </div>
                     )}
-                </div> {/* End .panel-content */}
+                </div>
 
-                {/* --- Floating Action Buttons (Edit and Delete) --- */}
-                {/* Rendered as siblings to panel-content, relative to slide-panel */}
-                {!isEditing && imageInfo && imageInfo.id !== "NEW_IMAGE_TEMP_ID" && ( // Don't show actions for a 'new' unsaved image
+                {!isEditing && imageInfo && imageInfo.id !== "NEW_IMAGE_TEMP_ID" && (
                     <>
-                        <button
-                            type="button"
-                            onClick={handleDeleteInitiate} // <<<< NEW
-                            className="delete-trash-button" // <<<< NEW CLASS
-                            aria-label="Delete Image"
-                            title="Delete Image"
-                        >
+                        <button type="button" onClick={handleDeleteInitiate} className="delete-trash-button" aria-label="Delete Image" title="Delete Image">
                             <FaTrash/>
                         </button>
-                        <button
-                            type="button"
-                            onClick={handleEditClick}
-                            className="edit-pencil-button"
-                            aria-label="Edit Details"
-                            title="Edit Details"
-                        >
-                                <FaEdit />
+                        <button type="button" onClick={handleEditClick} className="edit-pencil-button" aria-label="Edit Details" title="Edit Details">
+                            <FaEdit />
                         </button>
                     </>
                 )}
-                {/* --- End Floating Action Buttons --- */}
 
-
-                {/* --- Confirmation Dialog --- */}
                 {showDeleteConfirm && (
                     <div className="confirm-delete-overlay">
                         <div className="confirm-delete-dialog">
@@ -284,9 +251,7 @@ export function ImageEditPanel({
                         </div>
                     </div>
                 )}
-                {/* --- End Confirmation Dialog --- */}
-
-            </div> {/* End .slide-panel */}
-        </div> /* End .slide-panel-overlay */
+            </div>
+        </div>
     );
 }
