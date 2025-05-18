@@ -157,3 +157,147 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
     line-height: 1.1; /* Adjust for better fit with dynamic font size */
     max-width: 100%;
 }
+
+/* mapStyles.css or your dedicated search component CSS */
+/* mapStyles.css or your dedicated search component CSS */
+
+/* Container for the entire search UI (back button + search pill + dropdown) */
+.country-search-container.google-maps-style {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    display: flex; /* Align back button and search pill */
+    align-items: center;
+    gap: 8px; /* Space between back button and search pill */
+    font-family: 'Roboto', Arial, sans-serif; /* Google Maps uses Roboto */
+}
+
+/* Pill-shaped wrapper for the input field and search icon */
+.search-input-wrapper-gm {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 24px; /* This creates the pill shape */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Google Maps like shadow */
+    height: 48px; /* Typical height for Google Maps search bar */
+    padding-left: 16px; /* Padding for text inside input */
+    /* padding-right: is handled by the button's padding */
+    flex-grow: 1; /* Allows the search bar to take available width if container is wider */
+    min-width: 280px; /* Or your desired min width */
+    max-width: 400px;
+}
+
+.search-input-field-gm {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    font-size: 16px;
+    color: #333;
+    height: 100%;
+}
+
+.search-input-field-gm::placeholder {
+    color: #757575;
+}
+
+/* General class for action buttons inside or next to the search pill */
+.search-action-button-gm {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5f6368; /* Google's icon color */
+    padding: 0 12px; /* Padding for the icon button */
+    height: 100%; /* Match wrapper height */
+}
+.search-action-button-gm:hover {
+    background-color: rgba(0,0,0,0.05); /* Subtle hover */
+}
+
+
+.search-submit-icon-gm {
+    font-size: 20px; /* Adjust icon size */
+    padding-right: 16px; /* Padding on the right of the pill */
+    border-top-right-radius: 24px; /* Keep the pill shape */
+    border-bottom-right-radius: 24px;
+}
+
+/* Back button styling (distinct from the pill) */
+.search-back-button-gm {
+    background-color: #fff;
+    border: none;
+    border-radius: 50%; /* Circular button */
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    cursor: pointer;
+    color: #5f6368;
+    font-size: 20px; /* For arrow emoji or icon */
+    transition: background-color 0.2s ease;
+}
+
+.search-back-button-gm:hover {
+    background-color: #f1f3f4;
+}
+
+/* Suggestions Dropdown Styling */
+.search-results-dropdown-gm {
+    position: absolute; /* Position relative to country-search-container */
+    top: calc(100% + 6px); /* Below the search bar group */
+    left: 0; /* Align with the start of country-search-container */
+    /* If back button is present, you might want to align with search-input-wrapper-gm instead: */
+    /* left: 48px; /* Approx width of back button + gap */
+    width: calc(100% - 48px); /* Match width of search input wrapper if back button is there */
+    /* If no back button, or if relative to the search pill itself:
+    left: 0;
+    width: 100%; (relative to search-input-wrapper-gm if that's the positioned parent)
+    */
+    background-color: #fff;
+    border-radius: 8px; /* Softer radius for dropdown */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    list-style: none;
+    padding: 8px 0; /* Padding inside dropdown */
+    margin: 0;
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 1000; /* Below search bar but above map */
+}
+
+/* Adjust dropdown positioning if back button is part of the same positioned container */
+/* This example assumes .country-search-container is the reference for absolute positioning of the dropdown */
+.country-search-container.google-maps-style .search-results-dropdown-gm {
+    /* If the back button is present, the dropdown should align under the pill only */
+    left: calc(40px + 8px); /* Width of back button + gap */
+    width: auto; /* Let content define width, or set explicitly to match pill */
+    min-width: var(--search-pill-width, 280px); /* Match pill's min-width */
+}
+/* You'll need to set --search-pill-width CSS variable on .search-input-wrapper-gm or country-search-container */
+
+
+.search-result-item-gm {
+    padding: 10px 20px; /* More padding for items */
+    cursor: pointer;
+    font-size: 15px;
+    color: #3c4043;
+}
+
+.search-result-item-gm:hover,
+.search-result-item-gm:focus {
+    background-color: #f1f3f4; /* Google-like hover */
+    outline: none;
+}
+
+/* If using react-icons */
+.search-action-button-gm svg {
+    font-size: 20px; /* Adjust as needed */
+}
+.search-back-button-gm svg {
+    font-size: 18px;
+}

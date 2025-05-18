@@ -182,7 +182,7 @@
     bottom: 25px;
         right: 85px; /* 25px (edit button's right) + 50px (edit button's width) + 10px (gap) */
 
-    background: #3498db;
+    background: #1b6ef3;
     color: white;
     border: none;
     border-radius: 50%;
@@ -199,7 +199,6 @@
 }
 
 .edit-pencil-button:hover {
-    background-color: #2980b9;
     transform: scale(1.05); /* Slight lift effect */
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
@@ -362,13 +361,12 @@
 }
 
 .panel-edit-mode .panel-actions button.primary {
-    background-color: #2ecc71;
+    background-color: #007bff;
     color: white;
 }
 .panel-edit-mode .panel-actions button.primary:hover {
-    background-color: #27ae60;
+    background-color: #0056b3;
     box-shadow: 0 3px 6px rgba(0,0,0,0.1);
-    transform: translateY(-1px);
 }
 
 .panel-edit-mode .panel-actions button.secondary {
@@ -396,7 +394,7 @@
     /* Position it to the left of the edit button */
     /* Assuming edit button is 50px wide and right: 25px, plus 10px gap */
     right: 23px; /* 25px (edit button's right) + 50px (edit button's width) + 10px (gap) */
-    background: #00000f; /* Red for delete */
+    background: #f8fbfc; /* Red for delete */
     border: none;
     border-radius: 50%;
     width: 50px;
@@ -412,8 +410,9 @@
 }
 
 .delete-trash-button:hover {
-    background-color: #c0392b; /* Darker red */
-    transform: scale(1.05);
+    background-color: #d77266; /* Darker red */
+    color: #ffffff;
+    transform: scale(1.10);
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
 }
 

@@ -1,6 +1,8 @@
 "use client";
 
 import React, { useEffect, useRef, useCallback, useMemo, useState } from 'react';
+import { FaSearch, FaArrowLeft } from 'react-icons/fa';
+
 import 'leaflet/dist/leaflet.css';
 import './mapStyles.css'; // Your custom map styles
 import './ImageEditPanel.css'; // Styles for the panel (if not globally imported)
@@ -62,8 +64,14 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
     const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
     const [pickingLocationForImageId, setPickingLocationForImageId] = useState<string | null>(null);
     const [isMapReady, setIsMapReady] = useState<boolean>(false); // New state for map readiness
-
+    // At the top of your GalleryPage component function
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [searchResults, setSearchResults] = useState<CountryFeature[]>([]); // CountryFeature is already defined
+    const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState<boolean>(false);
+    const allCountryFeaturesRef = useRef<CountryFeature[]>([]); // To store all loaded country features
     const pickingLocationForImageIdRef = useRef(pickingLocationForImageId);
+    const searchContainerRef = useRef<HTMLDivElement>(null); // Ref for the search container div
+
     useEffect(() => {
         pickingLocationForImageIdRef.current = pickingLocationForImageId;
     }, [pickingLocationForImageId]);
@@ -183,6 +191,7 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
             if (map.options.minZoom !== undefined) targetZoom = Math.max(targetZoom, map.options.minZoom);
             map.flyTo(wrappedCenter, targetZoom);
         };
+        // Add a useEffect to handle clicks outside the search dropdown to close it
 
         const onEachFeature = (feature: CountryFeature, layer: Layer) => {
             layer.on({
@@ -197,16 +206,28 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
             });
         };
 
-        const loadGeoJsonData = async (currentMap: Map, L: typeof LType) => {
+        const loadGeoJsonData = async (mapInstance: Map, leaflet: typeof LType) => {
             try {
                 const response = await fetch(GEOJSON_URL);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                const data = await response.json() as GeoJSON.FeatureCollection<GeoJSON.Geometry, CountryFeatureProperties>;
-                if (geoJsonLayerRef.current && currentMap.hasLayer(geoJsonLayerRef.current)) {
-                    currentMap.removeLayer(geoJsonLayerRef.current);
+                // Explicitly type the expected structure from your GeoJSON
+                const geoJsonData = await response.json() as GeoJSON.FeatureCollection<GeoJSON.Geometry, CountryFeatureProperties>;
+
+                // Store all features for the search functionality
+                // Ensure that features are correctly cast or mapped to CountryFeature if necessary
+                allCountryFeaturesRef.current = geoJsonData.features.map(f => f as CountryFeature);
+
+                if (geoJsonLayerRef.current && mapInstance.hasLayer(geoJsonLayerRef.current)) {
+                    mapInstance.removeLayer(geoJsonLayerRef.current);
                 }
-                geoJsonLayerRef.current = L.geoJSON(data, { style: () => INITIAL_GEOJSON_STYLE, onEachFeature }).addTo(currentMap);
-            } catch (error) { console.error('Error loading or processing GeoJSON data:', error); }
+                geoJsonLayerRef.current = leaflet.geoJSON(geoJsonData, {
+                    style: () => INITIAL_GEOJSON_STYLE,
+                    onEachFeature: onEachFeature, // onEachFeature is defined in your map init useEffect
+                }).addTo(mapInstance);
+
+            } catch (error) {
+                console.error('Error loading or processing GeoJSON data:', error);
+            }
         };
 
         const initializeMap = async () => {
@@ -289,7 +310,7 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
     useEffect(() => {
         setImagesData(initialImagesData);
     }, [initialImagesData]);
-    
+
     const handleDeleteImage = useCallback((imageIdToDelete: string) => {
         setImagesData(currentImagesData =>
             currentImagesData.filter(image => image.id !== imageIdToDelete)
@@ -301,8 +322,166 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
     }, []); // Add dependencies if needed, e.g. [setImagesData]
 
 
+    const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+        const query = event.target.value;
+        setSearchQuery(query);
+
+        if (query.trim() === "") {
+            setSearchResults([]);
+            setIsSearchDropdownOpen(false);
+            return;
+        }
+
+        const filteredResults = allCountryFeaturesRef.current.filter(feature =>
+            feature.properties.name.toLowerCase().includes(query.toLowerCase())
+        );
+        setSearchResults(filteredResults.slice(0, 10)); // Limit to, say, 10 results
+        setIsSearchDropdownOpen(filteredResults.length > 0);
+    };
+
+    const flyToCountry = useCallback((feature: CountryFeature) => {
+        const map = mapRef.current;
+        const L = LRef.current;
+
+        if (!map || !L || !feature?.properties?.name || !feature.geometry) {
+            console.error("Cannot fly to country: Missing map, L, or valid feature data.");
+            return;
+        }
+
+        let bounds: L.LatLngBounds | undefined;
+        try {
+            // Create a temporary layer from the feature to get its bounds
+            const tempLayer = L.geoJSON(feature as GeoJSON.GeoJsonObject); // Cast to base GeoJsonObject
+            bounds = tempLayer.getBounds();
+        } catch (e) {
+            console.error("Error creating layer or getting bounds for feature:", feature.properties.name, e);
+            // Fallback if bounds cannot be determined (e.g., for some point geometries or malformed data)
+            // You might attempt to extract a representative point from the geometry if possible
+            if (feature.geometry && feature.geometry.type === 'Point') {
+                const coords = feature.geometry.coordinates as [number, number]; // lng, lat
+                map.flyTo([coords[1], coords[0]], 6); // Default zoom for a point
+            }
+            return;
+        }
+
+        if (!bounds || !bounds.isValid()) {
+            console.warn("Invalid bounds for country:", feature.properties.name);
+            // Similar fallback as above if bounds are not valid
+            if (feature.geometry && feature.geometry.type === 'Point') {
+                const coords = feature.geometry.coordinates as [number, number];
+                map.flyTo([coords[1], coords[0]], 6);
+            }
+            return;
+        }
+
+        let targetCenter = bounds.getCenter();
+        let targetZoom = map.getBoundsZoom(bounds);
+        const countryName = feature.properties.name;
+
+        zoomedCountryNameRef.current = countryName; // To prevent immediate re-highlight on mouseover
+        const adjustment = countrySpecificAdjustments[countryName];
+
+        if (adjustment) {
+            if (adjustment.fixedLat !== undefined && adjustment.fixedLng !== undefined) {
+                targetCenter = L.latLng(adjustment.fixedLat, adjustment.fixedLng);
+            } else if (adjustment.fixedLng !== undefined) {
+                targetCenter = L.latLng(targetCenter.lat, adjustment.fixedLng);
+            } else if (adjustment.fixedLat !== undefined) {
+                targetCenter = L.latLng(adjustment.fixedLat, targetCenter.lng);
+            }
+            if (adjustment.zoomFactor) {
+                targetZoom *= adjustment.zoomFactor;
+            }
+        }
+
+        const wrappedCenter = targetCenter.wrap();
+        if (map.options.maxZoom !== undefined) {
+            targetZoom = Math.min(targetZoom, map.options.maxZoom);
+        }
+        if (map.options.minZoom !== undefined) {
+            targetZoom = Math.max(targetZoom, map.options.minZoom);
+        }
+
+        map.flyTo(wrappedCenter, targetZoom, { duration: 1.5 }); // Added duration for smoother flight
+
+        // Clear search and close dropdown
+        setSearchQuery("");
+        setSearchResults([]);
+        setIsSearchDropdownOpen(false);
+
+    }, [mapRef, LRef]); // `zoomedCountryNameRef` is a ref, no need in deps
+
+    const handleSearchResultClick = (feature: CountryFeature) => {
+        flyToCountry(feature);
+        // Optionally, you could also set the searchQuery to the selected country name
+        // setSearchQuery(feature.properties.name);
+    };
+    useEffect(() => {
+        function handleClickOutside(event: MouseEvent) {
+            if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
+                setIsSearchDropdownOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [searchContainerRef]);
+    // Inside your GalleryPage component function:
+
+    const handleBackButtonClick = () => {
+        setSearchQuery("");
+        setSearchResults([]);
+        setIsSearchDropdownOpen(false);
+        // You could add more functionality here later, like going to a previous map view if you implement such a history.
+    };
     return (
-        <>
+        <>{/* Search Feature UI */}
+            <div ref={searchContainerRef} className="country-search-container google-maps-style">
+                {/* Back button - can be styled to be less prominent or part of a different flow */}
+                <button
+                    type="button"
+                    className="search-back-button-gm" // New class for distinct styling
+                    onClick={handleBackButtonClick}
+                    aria-label="Clear search or go back"
+                >
+                    <FaArrowLeft />
+                </button>
+
+                <div className="search-input-wrapper-gm"> {/* Wraps input and search icon */}
+                    <input
+                        type="text"
+                        className="search-input-field-gm"
+                        placeholder="Search for a country..."
+                        value={searchQuery}
+                        onChange={handleSearchChange}
+                        onFocus={() => searchQuery && searchResults.length > 0 && setIsSearchDropdownOpen(true)}
+                    />
+                    <button
+                        type="button"
+                        className="search-action-button-gm search-submit-icon-gm"
+                        aria-label="Search"
+                    // onClick={handleSearchSubmit} // If you want the icon to trigger search
+                    >
+                        <FaSearch />
+                    </button>
+                </div>
+                {isSearchDropdownOpen && searchResults.length > 0 && (
+                    <ul className="search-results-dropdown-gm">
+                        {searchResults.map(feature => (
+                            <li
+                                key={feature.properties.name}
+                                onClick={() => handleSearchResultClick(feature)}
+                                className="search-result-item-gm"
+                                tabIndex={0}
+                                onKeyDown={(e) => { if (e.key === 'Enter') handleSearchResultClick(feature); }}
+                            >
+                                {feature.properties.name}
+                            </li>
+                        ))}
+                    </ul>
+                )}
+            </div>
             <div ref={mapContainerRef} className="map-container" aria-label="Interactive world map"></div>
             {isPanelOpen && editingImage && (
                 <ImageEditPanel
@@ -311,8 +490,7 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
                     onClose={handlePanelClose}
                     isOpen={isPanelOpen}
                     onStartPickLocation={handleStartPickLocation}
-                    onDelete={handleDeleteImage} // <<<< PASS THE NEW HANDLER
-
+                    onDelete={handleDeleteImage}
                 />
             )}
         </>

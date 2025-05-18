@@ -2,6 +2,8 @@
 
 import React, { useState, useEffect, useRef } from 'react';
 import type { ImageInfo } from './imageMarkerUtils';
+import { FaEdit, FaTrash } from 'react-icons/fa';
+
 // import './ImageEditPanel.css'; // Ensure styles are imported
 
 // Define the shape of the data passed up
@@ -254,7 +256,7 @@ export function ImageEditPanel({
                             aria-label="Delete Image"
                             title="Delete Image"
                         >
-                            🗑️
+                            <FaTrash/>
                         </button>
                         <button
                             type="button"
@@ -263,7 +265,7 @@ export function ImageEditPanel({
                             aria-label="Edit Details"
                             title="Edit Details"
                         >
-                            ✏️
+                                <FaEdit />
                         </button>
                     </>
                 )}
