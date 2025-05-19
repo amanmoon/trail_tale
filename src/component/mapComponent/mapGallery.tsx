@@ -22,7 +22,7 @@ const MAX_ZOOM: number = 14;
 
 const WORLD_BOUNDS: LatLngBoundsLiteral = [[-75, -170], [82, 190]];
 const MAX_BOUNDS_VISCOSITY: number = 0.88;
-const TILE_LAYER_URL: string = 'https://tiles.stadiamaps.com/tiles/outdoors/{z}/{x}/{y}{r}.png';
+const TILE_LAYER_URL: string = 'https://a.tile.openstreetmap.org/{z}/{x}/{y}.png';
 const TILE_LAYER_ATTRIBUTION: string = '&copy; <a href="https://www.stadiamaps.com/" target="_blank">Stadia Maps</a> &copy; <a href="https://openmaptiles.org/" target="_blank">OpenMapTiles</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors';
 const GEOJSON_URL: string = 'https://raw.githubusercontent.com/johan/world.geo.json/master/countries.geo.json';
 
