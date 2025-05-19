@@ -1,0 +1,217 @@
+.hero {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: calc(100vh - 60px); 
+  padding: 3rem 2rem;
+  background-color: #ffffff; 
+  position: relative;
+  overflow: hidden;
+}
+
+.hero::before {
+  content: '';
+  position: absolute;
+  width: 120vw; 
+  height: 400px; 
+  background-color: rgba(26, 115, 232, 0.08);
+  border-radius: 50%;
+  top: 5%;   
+  left: -30vw;
+  transform: rotate(-20deg);
+  
+  z-index: 1;
+  opacity: 0.8; 
+}
+
+.heroContainer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  max-width: 1100px;
+  gap: 3rem;
+  position: relative;
+  z-index: 2;
+}
+
+.heroBackground {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, rgba(26,115,232,0.03) 0%, rgba(255,255,255,0) 70%);
+  z-index: 0;
+  opacity: 0.7;
+}
+
+.heroContent {
+  flex: 1 1 55%;
+  max-width: 550px;
+  text-align: left;
+  animation: fadeInText 0.8s ease-out forwards;
+}
+
+@keyframes fadeInText {
+  from { opacity: 0; transform: translateX(-20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.headline {
+  font-size: 3rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--primary-text-color, #202124);
+  margin-bottom: 1.5rem;
+}
+
+.headline .highlight {
+  color: var(--accent-color, #1a73e8);
+}
+
+.subHeadline {
+  font-size: 1.15rem;
+  color: var(--secondary-text-color, #5F6368);
+  line-height: 1.7;
+  margin-bottom: 2.5rem;
+}
+
+.heroImageWrapper {
+  flex: 1 1 40%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  position: relative;
+  min-height: 380px;
+  perspective: 1000px;
+  animation: fadeInImageGroup 0.8s 0.2s ease-out forwards;
+}
+
+@keyframes fadeInImageGroup {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.polaroid {
+  background-color: #fff;
+  padding: 15px 15px 20px 15px;
+  border: 1px solid #e0e0e0;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+  width: fit-content;
+  transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
+  position: absolute;
+}
+
+.imageArea {
+  position: relative;
+  display: block;
+}
+
+.polaroidImage { 
+  display: block !important; 
+  border: 1px solid #f0f0f0;
+  border-radius: 2px;
+}
+
+.mapPinIcon {
+  position: absolute;
+  top: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 1.8rem;
+  color: #E53935;
+  filter: drop-shadow(1px 1px 1px rgba(0,0,0,0.3));
+  z-index: 5;
+}
+
+.polaroidBack {
+  transform: rotate(-8deg) translateX(-15%) translateY(5%);
+  z-index: 1; 
+}
+.polaroidBack:hover {
+  transform: rotate(-10deg) translateX(-15%) translateY(5%) scale(1.03);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.polaroidFront {
+  transform: rotate(5deg) translateX(10%) translateY(-5%);
+  z-index: 2; 
+}
+.polaroidFront:hover {
+  transform: rotate(3deg) translateX(10%) translateY(-5%) scale(1.05);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.polaroidCaption {
+  text-align: center;
+  margin-top: 12px;
+  font-family: var(--font-caveat, cursive);
+  font-size: 1.1rem;
+  color: #444;
+}
+
+@media (max-width: 992px) {
+  .heroContainer {
+    gap: 2rem;
+  }
+  .headline {
+    font-size: 2.5rem;
+  }
+  .subHeadline {
+    font-size: 1.05rem;
+  }
+  .heroImageWrapper {
+    min-height: 320px;
+  }
+  .polaroidBack {
+    transform: rotate(-8deg) translateX(-10%) translateY(5%) scale(0.9);
+  }
+  .polaroidFront {
+    transform: rotate(5deg) translateX(5%) translateY(-5%) scale(0.95);
+  }
+  .hero::before { 
+    width: 150vw;
+    height: 350px;
+    left: -40vw;
+    top: 10%;
+    transform: rotate(-18deg);
+  }
+}
+
+@media (max-width: 768px) {
+  .hero {
+    padding: 2rem 1rem; 
+  }
+  .heroContainer {
+    flex-direction: column;
+    text-align: center;
+  }
+  .heroContent {
+    text-align: center;
+    max-width: 100%;
+    margin-bottom: 1rem;
+    animation: none;
+  }
+  .heroImageWrapper {
+    margin-top: 2.5rem;
+    min-height: 300px;
+    animation: none;
+    width: 100%;
+  }
+  .polaroidBack {
+    transform: rotate(-6deg) scale(0.85);
+  }
+  .polaroidFront {
+    transform: rotate(4deg) scale(0.9);
+  }
+  .hero::before { 
+    width: 180vw; 
+    height: 250px; 
+    left: -50vw;  
+    top: 15%;     
+    transform: rotate(-15deg); 
+    opacity: 0.6;
+  }
+}

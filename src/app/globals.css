@@ -2,8 +2,54 @@
 body {
     height: 100vh;
   width: 100vw;
-  overflow-x: hidden;
-  overflow-y: hidden;
+  /* overflow-x: hidden;
+  overflow-y: hidden; */
   padding: 0px;
   margin: 0px;
 }
+/* src/app/globals.css */
+:root {
+  --font-inter: 'Inter', sans-serif; /* Assuming Inter is loaded via next/font */
+  --font-permanent-marker: 'Permanent Marker', cursive; /* Assuming loaded */
+
+  --primary-background: #FFFFFF;
+  --secondary-background: #F8F9FA;
+  --primary-text-color: #202124;
+  --secondary-text-color: #5F6368;
+  --accent-color: #1a73e8;
+  --accent-color-darker: #1765cc;
+  --light-text-color: #e9ecef; /* For dark backgrounds */
+  --border-color: #dadce0;
+}
+
+/* Basic Reset & Defaults */
+body, html {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: var(--font-inter);
+  background-color: var(--primary-background);
+  color: var(--primary-text-color);
+  scroll-behavior: smooth;
+}
+
+*, *::before, *::after {
+  box-sizing: inherit;
+}
+
+/* Headings default styling (optional, can be component-specific) */
+h1, h2, h3, h4, h5, h6 {
+  margin-top: 0;
+  line-height: 1.3;
+}
+
+a {
+  color: var(--accent-color);
+  text-decoration: none;
+}
+a:hover {
+  text-decoration: underline;
+}
+
+/* Remove default Next.js dark mode styles if you don't need them */
+/* Or any other boilerplate from create-next-app */

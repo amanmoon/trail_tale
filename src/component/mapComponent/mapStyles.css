@@ -1,0 +1,306 @@
+.map-container {
+  height: 100%;
+  width: 100%;
+}
+
+.custom-map-image-icon.polaroid-style {
+  background-color: white;
+  border: 1px solid #ccc; 
+  padding: 10px; 
+  padding-bottom: 40px; 
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2); 
+  border-radius: 3px; 
+  position: relative;
+  box-sizing: border-box; 
+}
+
+.custom-map-image-icon.polaroid-style img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the area, might crop */
+  border: 1px solid #eee; /* Optional: a very light border around the image itself */
+}
+
+/* Style for the "pin" - using a pseudo-element */
+/* Style for the text (country name) - using a pseudo-element */
+.custom-map-image-icon.polaroid-style::after {
+  content: attr(data-country-name); /* Will pull text from a data attribute */
+  position: absolute;
+  bottom: 10px; /* Position at the bottom of the padding */
+  left: 0;
+  right: 0;
+  text-align: center;
+  font-family: 'Arial', sans-serif; /* Choose a suitable font */
+  color: #333;
+  font-size: 14px;
+  font-style: italic; /* If you want italic text like in the example */
+}
+
+.leaflet-marker-icon {
+  overflow: visible !important;
+}
+
+.custom-map-marker-wrapper {
+    /* background-color: rgba(0, 255, 0, 0.1); /* For debugging iconSize area */
+    display: flex;
+    justify-content: center;
+    align-items: flex-start; /* Align paper to the top (considering pin space) */
+}
+
+
+.leaflet-polaroid-marker-wrapper {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    -webkit-backface-visibility: hidden; /* Improve rendering during transforms */
+    backface-visibility: hidden;
+}
+
+.map-marker-polaroid-outer-container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.map-marker-polaroid-card {
+    background-color: #fefefe; /* Slightly off-white for aged paper */
+    border: 1px solid #cacaca;
+    box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3), -1px -1px 3px rgba(255,255,255,0.5); /* More distinct shadow */
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    transform: rotate(-3.5deg); /* Default tilt */
+    transition: transform 0.1s ease-out; /* Smooth transform on hover */
+}
+
+.leaflet-polaroid-marker-wrapper:hover .map-marker-polaroid-card {
+    transform: rotate(-1deg) scale(1.05); /* Slight un-tilt and scale up on hover */
+    box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.35);
+}
+
+.map-marker-polaroid-pin {
+    color: #444;
+    position: absolute;
+    left: 55%;
+    transform: translateX(-50%) rotate(10deg);
+    z-index: 10;
+    pointer-events: none;
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2); 
+}
+
+.map-marker-polaroid-image {
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    border-style: solid;
+    border-color: #e0e0e0; 
+    box-shadow: inset 0 0 4px rgba(0,0,0,0.08);
+}
+
+.map-marker-polaroid-caption {
+    /* height, margin-top are set by inline styles */
+    width: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 1px 0; /* Minimal vertical padding */
+    background-color: transparent; /* Caption is on the same paper */
+}
+
+.map-marker-caption-text {
+    font-family: 'Caveat', cursive;
+    color: #3a3a3a;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    padding: 0 3px;
+    margin: 0;
+    line-height: 1.1; 
+    max-width: 100%;
+}
+
+.country-search-container.google-maps-style {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+    z-index: 1001;
+    display: flex; /* Align back button and search pill */
+    align-items: center;
+    gap: 8px; /* Space between back button and search pill */
+    font-family: 'Roboto', Arial, sans-serif; /* Google Maps uses Roboto */
+}
+
+/* Pill-shaped wrapper for the input field and search icon */
+.search-input-wrapper-gm {
+    display: flex;
+    align-items: center;
+    background-color: #fff;
+    border-radius: 24px; /* This creates the pill shape */
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Google Maps like shadow */
+    height: 48px; /* Typical height for Google Maps search bar */
+    padding-left: 16px; /* Padding for text inside input */
+    /* padding-right: is handled by the button's padding */
+    flex-grow: 1; /* Allows the search bar to take available width if container is wider */
+    min-width: 280px; /* Or your desired min width */
+    max-width: 400px;
+}
+
+.search-input-field-gm {
+    flex-grow: 1;
+    border: none;
+    outline: none;
+    background-color: transparent;
+    font-size: 16px;
+    color: #333;
+    height: 100%;
+}
+
+.search-input-field-gm::placeholder {
+    color: #757575;
+}
+
+.search-action-button-gm {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #5f6368; /* Google's icon color */
+    padding: 0 12px; /* Padding for the icon button */
+    height: 100%; /* Match wrapper height */
+}
+.search-action-button-gm:hover {
+    background-color: rgba(0,0,0,0.05); /* Subtle hover */
+}
+
+
+.search-submit-icon-gm {
+    font-size: 20px;
+    padding-right: 16px; 
+    border-top-right-radius: 24px; 
+    border-bottom-right-radius: 24px;
+}
+
+/* Back button styling (distinct from the pill) */
+.search-back-button-gm {
+    background-color: #fff;
+    border: none;
+    border-radius: 50%; /* Circular button */
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    cursor: pointer;
+    color: #5f6368;
+    font-size: 20px; /* For arrow emoji or icon */
+    transition: background-color 0.2s ease;
+}
+
+.search-back-button-gm:hover {
+    background-color: #f1f3f4;
+}
+
+/* Suggestions Dropdown Styling */
+.search-results-dropdown-gm {
+    position: absolute; /* Position relative to country-search-container */
+    top: calc(100% + 6px); /* Below the search bar group */
+    left: 0; 
+    width: calc(100% - 48px); /* Match width of search input wrapper if back button is there */
+    background-color: #fff;
+    border-radius: 8px; /* Softer radius for dropdown */
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    list-style: none;
+    padding: 8px 0; /* Padding inside dropdown */
+    margin: 0;
+    max-height: 280px;
+    overflow-y: auto;
+    z-index: 1000; /* Below search bar but above map */
+}
+
+.country-search-container.google-maps-style .search-results-dropdown-gm {
+    left: calc(40px + 8px); /* Width of back button + gap */
+    width: auto; /* Let content define width, or set explicitly to match pill */
+    min-width: var(--search-pill-width, 280px); /* Match pill's min-width */
+}
+
+.search-result-item-gm {
+    padding: 10px 20px; /* More padding for items */
+    cursor: pointer;
+    font-size: 15px;
+    color: #3c4043;
+}
+
+.search-result-item-gm:hover,
+.search-result-item-gm:focus {
+    background-color: #f1f3f4; /* Google-like hover */
+    outline: none;
+}
+
+/* If using react-icons */
+.search-action-button-gm svg {
+    font-size: 20px; /* Adjust as needed */
+}
+.search-back-button-gm svg {
+    font-size: 18px;
+}
+
+.map-actions-overlay {
+  position: absolute; /* Positioned relative to its nearest positioned ancestor (e.g., the map container or a page wrapper) */
+  top: 20px;          /* Distance from the top. Adjust if you have a search bar or other elements above it. */
+                     /* For example, if your search bar is 60px tall and also at the top, you might use top: 80px; */
+  right: 20px;         /* Distance from the right */
+  z-index: 1050;       /* Ensures it's above map elements and potentially other simple overlays. */
+                     /* Panels/Modals should have a higher z-index (e.g., 2000+). */
+  display: flex;       /* Enables easy alignment if more buttons are added here later */
+  flex-direction: column; /* Stack multiple buttons vertically if needed */
+  gap: 10px;           /* Space between multiple buttons if any */
+}
+
+.map-overlay-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0; 
+  background-color: #ffffff; 
+  border: none;        
+  cursor: pointer;
+  color: #5f6368; 
+  transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.add-new-image-button {
+  width: 48px;  
+  height: 48px; 
+  border-radius: 24px; 
+  box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+  font-size: 24px; 
+}
+
+.add-new-image-button:hover {
+  background-color: #f8f9fa; 
+  box-shadow: 0 6px 12px rgba(0,0,0,0.18), 0 4px 8px rgba(0,0,0,0.25);
+}
+
+.add-new-image-button:active {
+  background-color: #f1f3f4; 
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.20);
+  transform: translateY(1px); 
+}
+
+.add-new-image-button:disabled {
+  background-color: #f1f3f4; /* Greyed out background for disabled state */
+  color: #bdc1c6;          /* Lighter icon color when disabled */
+  box-shadow: none;         /* No shadow when disabled, appears flat */
+  cursor: not-allowed;
+  transform: none;          /* No press effect when disabled */
+}

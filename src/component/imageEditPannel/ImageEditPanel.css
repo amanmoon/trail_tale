@@ -1,0 +1,905 @@
+.slide-panel-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease-in-out, visibility 0s linear 0.3s;
+    z-index: 1999;
+    display: flex;
+    justify-content: flex-end;
+    align-items: flex-start;
+    padding: 20px;
+    box-sizing: border-box;
+}
+
+.slide-panel-overlay.open {
+    opacity: 1;
+    visibility: visible;
+    transition: opacity 0.3s ease-in-out;
+}
+
+.slide-panel {
+    background-color: #ffffff;
+    width: 450px;
+    max-width: 100%;
+    height: calc(100vh - 40px);
+    border-radius: 16px; 
+    box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18), 0 7px 12px rgba(0,0,0,0.12); 
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden; /* Ensures image corners are clipped by panel's border-radius */
+
+    opacity: 0;
+    transform: translateX(30px) scale(0.98);
+    transition: opacity 0.25s ease-out, transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.slide-panel.open {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+}
+
+/* --- Close Button --- */
+.close-button {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    background: rgba(255, 255, 255, 0.6); /* Brighter for better visibility on image */
+    backdrop-filter: blur(3px); /* Frosted glass effect if image is behind */
+    border: none;
+    border-radius: 50%;
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
+    font-weight: bold;
+    color: #333;
+    cursor: pointer;
+    line-height: 32px;
+    text-align: center;
+    transition: background-color 0.2s ease, color 0.2s ease, transform 0.2s ease;
+    z-index: 10; /* Above image and content */
+}
+
+.close-button:hover {
+    background-color: rgba(255, 255, 255, 0.8);
+    transform: scale(1.1);
+}
+
+/* --- Panel Content (shared styling) --- */
+.panel-content {
+    /* Top padding is now effectively handled by image container or elements below it */
+    padding: 0 25px 25px 25px;
+    flex-grow: 1;
+    overflow-y: auto;
+    display: flex;
+    flex-direction: column;
+    position: relative; /* For stacking context if needed */
+     -ms-overflow-style: none;
+
+    /* For Firefox */
+    scrollbar-width: none;
+}
+
+/* ======================= DISPLAY MODE ======================= */
+.panel-display-mode {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    text-align: left;
+    flex-grow: 1; /* Allow display mode to fill space for bottom-aligned button */
+    position: relative; /* For positioning elements within if needed, though FAB is relative to panel */
+}
+
+/* Full-width Image Container */
+.panel-display-mode .image-container {
+    width: calc(100% + 50px); /* Span full panel width, breaking out of panel-content padding */
+    margin-left: -25px; /* Align with left edge of panel */
+    margin-right: -25px; /* Align with right edge of panel */
+    margin-top: 0; /* Start at the very top of panel-content (which has no top padding now) */
+    height: 300px; /* SIGNIFICANTLY LARGER IMAGE HEIGHT */
+    overflow: hidden; /* Not strictly needed if panel has overflow:hidden, but good practice */
+    /* No border-radius here; panel's overflow:hidden will clip it */
+}
+
+.panel-display-mode .panel-image-large {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Content below the image */
+.panel-display-mode .text-content-area {
+    padding-top: 20px; /* Space between full-width image and the text */
+    /* This div would wrap H1, H3, details-group, panel-long-lat if you want them scrolled together
+       but separate from a fixed image. If image scrolls with content, this div is not strictly needed.
+       For now, assume H1 etc. are direct children of panel-display-mode after image-container. */
+}
+
+
+.panel-display-mode h1 {
+    font-size: 2em;
+    font-weight: 700; /* Bolder */
+    color: #1a2c3b; /* Darker, richer blue */
+    margin-top: 20px; /* Space after the image */
+    margin-bottom: 7px;
+    line-height: 1.2;
+}
+
+.panel-display-mode h3 { /* Description */
+    font-size: 1em;
+    font-weight: 400;
+    color: #5a6877; /* Softer description color */
+    margin-top: 0;
+    margin-bottom: 24px;
+    line-height: 1.65;
+    white-space: pre-wrap;
+}
+
+.panel-display-mode .details-group {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+    font-size: 0.9em;
+    color: #4a5568; /* Tailwind-ish gray */
+    padding: 12px 0;
+    border-top: 1px solid #e2e8f0;
+}
+.panel-display-mode .details-group p { margin: 0; }
+
+.panel-display-mode .panel-long-lat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.9em;
+    color: #4a5568;
+    padding: 12px 0;
+    margin-bottom: 20px; /* Less margin if edit button is FAB */
+    border-bottom: 1px solid #e2e8f0;
+}
+.panel-display-mode .panel-long-lat p { margin: 0; }
+
+.panel-display-mode .details-group strong,
+.panel-display-mode .panel-long-lat strong {
+    color: #2d3748;
+    margin-right: 8px;
+}
+
+/* Edit (Pencil) Button - Floating Action Button style */
+/* Removed from .panel-actions div. Now positioned absolutely to .slide-panel */
+.edit-pencil-button {
+    position: absolute; /* Relative to .slide-panel */
+    bottom: 25px;
+        right: 85px; /* 25px (edit button's right) + 50px (edit button's width) + 10px (gap) */
+
+    background: #1b6ef3;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    width: 50px; /* Larger FAB */
+    height: 50px; /* Larger FAB */
+    font-size: 22px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 5; /* Above most content */
+}
+
+.edit-pencil-button:hover {
+    transform: scale(1.05); /* Slight lift effect */
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+.edit-pencil-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Hide the old panel-actions div in display mode if it's still in JSX */
+.panel-display-mode .panel-actions {
+    display: none;
+}
+
+/* ImageEditPanel.css - CONTINUED */
+
+/* panel-content already has top padding to clear the close button */
+/* panel-content {
+    padding: 50px 25px 25px 25px;
+    ...
+} */
+
+/* ======================= EDIT MODE - Image Preview Full Width ======================= */
+.panel-edit-mode {
+    width: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.panel-edit-mode form {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+    width: 100%;
+}
+
+/* Full-width Image Preview Container for Edit Mode */
+.panel-edit-mode .form-image-preview-container {
+     width: calc(100% + 50px); /* Span full panel width, breaking out of panel-content padding */
+    margin-left: -25px; /* Align with left edge of panel */
+    margin-right: -25px; /* Align with right edge of panel */
+    margin-top: 0; /* Start at the very top of panel-content (which has no top padding now) */
+    height: 300px; /* SIGNIFICANTLY LARGER IMAGE HEIGHT */
+    overflow: hidden; /* Not strictly needed if panel has overflow:hidden, but good practice */
+    /* No border-radius here; panel's overflow:hidden will clip it */
+}
+
+.panel-edit-mode .form-image-preview {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; /* Ensures the image covers the container */
+    /* No box-shadow if it's meant to be a seamless top part */
+}
+
+/* Adjust title margin to account for the new image position */
+.panel-edit-mode h4 {
+    font-size: large;
+    color: #1a2c3b;
+    margin-top: 0;
+    margin-bottom: 15px;
+    font-weight: 600;
+}
+
+
+/* Existing styles for form-group, label, input, location-input-group, etc.,
+   should largely remain the same. Ensure they fit well visually after the
+   larger image. */
+
+.form-group {
+    margin-bottom: 18px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: 500;
+    color: #3d4852;
+    margin-bottom: 7px;
+    font-size: 0.875em;
+}
+
+.form-group input[type="text"],
+.form-group input[type="url"],
+.form-group textarea {
+    width: 100%;
+    padding: 11px 15px;
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 0.95em;
+    background-color: #f7fafc;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="url"]:focus,
+.form-group textarea:focus {
+    border-color: #3498db;
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2);
+    outline: none;
+    background-color: #fff;
+}
+/* --- Styling for the date input --- */
+.form-group input[type="date"] {
+    width: 100%;
+    padding: 10px 15px; /* Slightly adjusted vertical padding for date input typical height */
+    border: 1px solid #cbd5e0;
+    border-radius: 6px;
+    box-sizing: border-box;
+    font-size: 0.95em; /* Match other inputs */
+    background-color: #f7fafc; /* Light background */
+    color: #333; /* Text color */
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    font-family: inherit; /* Ensures font matches other inputs */
+    line-height: normal; /* Explicitly set line-height, some browsers might differ for date */
+    cursor: text; /* Show text cursor for the field part */
+    min-height: calc(11px + 11px + 0.95em + 2px); /* Approximate height matching other inputs: padding-top + padding-bottom + font-size + border*2  */
+                                              /* Adjust 0.95em based on actual rendered line height if needed */
+}
+
+/* Focus styles for the date input */
+.form-group input[type="date"]:focus {
+    border-color: #3498db; /* Blue border on focus */
+    box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.2); /* Light blue glow */
+    outline: none;
+    background-color: #fff; /* White background on focus */
+}
+
+/* Styles for the disabled state of the date input */
+.form-group input[type="date"]:disabled {
+    background-color: #e9ecef; /* Lighter grey for disabled state */
+    color: #6c757d; /* Dimmed text color */
+    cursor: not-allowed;
+    border-color: #ced4da;
+}
+
+/* --- Styling for the calendar picker indicator (primarily for WebKit browsers) --- */
+.form-group input[type="date"]::-webkit-calendar-picker-indicator {
+    background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="15" viewBox="0 0 24 24"><path fill="%235f6368" d="M20 3h-1V1h-2v2H7V1H5v2H4c-1.1 0-2 .9-2 2v16c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 18H4V8h16v13z"/></svg>'); /* Custom SVG icon (dark grey) */
+    background-repeat: no-repeat;
+    background-position: center;
+    opacity: 0.7;
+    cursor: pointer;
+    padding: 0 5px; /* Add some padding around the icon if needed */
+}
+
+.form-group input[type="date"]:hover::-webkit-calendar-picker-indicator {
+    opacity: 1;
+}
+
+.form-group input[type="date"]::-webkit-inner-spin-button,
+.form-group input[type="date"]::-webkit-clear-button {
+    display: none; /* Hide spinner and clear button for a cleaner look */
+    -webkit-appearance: none;
+}
+
+/* Location Input Group Styling (from previous step) */
+.location-input-group {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #f8f9fa;
+    padding: 8px 12px;
+    border-radius: 6px;
+    border: 1px solid #dee2e6;
+}
+
+.coordinates-text {
+    font-size: 0.9em;
+    color: #495057;
+    display: flex;
+    gap: 15px;
+}
+
+.coordinates-text span {
+    white-space: nowrap;
+}
+
+.pick-location-icon-btn {
+    background: none;
+    border: none;
+    font-size: 1.6em;
+    color: #007bff;
+    cursor: pointer;
+    padding: 5px;
+    line-height: 1;
+    transition: color 0.2s ease, transform 0.2s ease;
+}
+
+.pick-location-icon-btn:hover {
+    color: #0056b3;
+    transform: scale(1.1);
+}
+
+/* Panel Actions (Save/Cancel) at the bottom */
+.panel-edit-mode .panel-actions {
+    margin-top: auto; /* Pushes to the bottom */
+    padding-top: 20px;
+    display: flex;
+    gap: 12px;
+    width: 100%;
+}
+
+/* ... (rest of your .panel-actions button styling remains the same) ... */
+.panel-edit-mode .panel-actions button {
+    flex-grow: 1;
+    padding: 12px 15px;
+    border: none;
+    border-radius: 8px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.panel-edit-mode .panel-actions button.primary {
+    background-color: #007bff;
+    color: white;
+}
+.panel-edit-mode .panel-actions button.primary:hover {
+    background-color: #0056b3;
+    box-shadow: 0 3px 6px rgba(0,0,0,0.1);
+}
+
+.panel-edit-mode .panel-actions button.secondary {
+    background-color: #f1f5f9;
+    color: #4a5568;
+}
+.panel-edit-mode .panel-actions button.secondary:hover {
+    background-color: #e2e8f0;
+    transform: translateY(-1px);
+}
+
+.panel-edit-mode .panel-actions button:active {
+    transform: translateY(0px) scale(0.98);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+}
+
+/* ImageEditPanel.css - CONTINUED */
+
+/* ... existing styles ... */
+
+/* Styling for the new Delete (Trash) Button FAB */
+.delete-trash-button, .delete-trash-button-internal {
+    position: absolute;
+     /* 25px (edit button's right) + 50px (edit button's width) + 10px (gap) */
+    background: #f8fbfc; /* Red for delete */
+    border: none;
+    border-radius: 50%;
+    width: 50px;
+    height: 50px;
+    font-size: 22px; /* Adjust for trash icon size */
+    cursor: pointer;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease;
+    z-index: 5; /* Same level as edit button, or slightly lower if desired */
+}
+
+.delete-trash-button{
+bottom: 25px;
+    /* Position it to the left of the edit button */
+    /* Assuming edit button is 50px wide and right: 25px, plus 10px gap */
+    right: 23px;
+}
+
+.delete-trash-button:hover {
+    background-color: #d77266; /* Darker red */
+    color: #ffffff;
+    transform: scale(1.10);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25);
+}
+
+.delete-trash-button:active {
+    transform: scale(0.98);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+
+/* Confirmation Dialog Styles */
+.confirm-delete-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.65); /* Darker overlay for focus */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 100; /* Above other panel content and FABs */
+    /* Ensure it respects panel's border radius if it's the same size */
+    border-radius: inherit; /* Inherit from .slide-panel if needed */
+}
+
+.confirm-delete-dialog {
+    background-color: #fff;
+    padding: 25px 30px;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 5px 20px rgba(0, 0, 0, 0.25);
+    width: 79%;
+    max-width: 380px; /* Max width for the dialog */
+    animation: fadeInDialog 0.2s ease-out;
+}
+
+.confirm-delete-dialog p {
+    font-size: 1.1em;
+    color: #333;
+    margin-top: 0;
+    margin-bottom: 25px;
+    line-height: 1.5;
+}
+
+.confirm-delete-actions {
+    display: flex;
+    justify-content: space-evenly; /* Or center with gap */
+    gap: 15px;
+}
+
+.confirm-delete-actions button {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s ease, transform 0.1s ease;
+    min-width: 100px; /* Ensure buttons have a decent min width */
+}
+
+.confirm-delete-actions .button-danger {
+    background-color: #e74c3d; /* Red */
+    color: white;
+}
+.confirm-delete-actions .button-danger:hover {
+    background-color: #c0392b;
+    transform: translateY(-1px);
+}
+
+.confirm-delete-actions .button-secondary {
+    background-color: #ecf0f1; /* Light grey */
+    color: #34495e;
+    /* border: 1px solid #bdc3c7; */ /* Optional border */
+}
+.confirm-delete-actions .button-secondary:hover {
+    background-color: #dadedf;
+    transform: translateY(-1px);
+}
+
+@keyframes fadeInDialog {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Adjust FAB positioning on smaller screens if needed */
+@media (max-width: 520px) {
+    .delete-trash-button {
+        right: 70px; /* Adjust spacing from edit button */
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        bottom: 15px; /* Match edit button's bottom */
+    }
+    /* Ensure edit button is also adjusted if not already */
+    .edit-pencil-button { /* From previous CSS */
+        width: 44px;
+        height: 44px;
+        font-size: 20px;
+        bottom: 15px;
+        right: 15px;
+    }
+}
+
+
+.manage-images-button { /* Button in displayDetails to go to manageImages view */
+    display: block;
+    width: 100%;
+    padding: 10px 15px;
+    margin-top: 20px; /* Space after the preview list or empty message */
+    background-color: #007bff; /* Primary action color */
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 0.95em;
+    font-weight: 500;
+    cursor: pointer;
+    text-align: center;
+    transition: background-color 0.2s ease;
+}
+.manage-images-button:hover {
+    background-color: #0056b3;
+}
+
+
+/* --- Styles for the Manage Images View --- */
+.panel-manage-images-mode {
+    display: flex;
+    flex-direction: column;
+    height: 100%; 
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.manage-images-header {
+    display: flex;
+    align-items: center;
+    margin-top: 20px; /* Increased space */
+    margin-bottom: 20px;
+    padding-bottom: 15px; /* Increased space */
+    border-bottom: 1px solid #dee2e6; /* More subtle border */
+}
+
+.manage-images-header h3 {
+    margin: 0 0 0 15px; /* Added margin to separate from back button */
+    font-size: 1.4em; /* Larger title */
+    color: #1a2c3b;
+    font-weight: 600;
+    flex-grow: 1;
+    text-align: left; /* Align left, back button is on the left */
+}
+
+.back-to-details-btn {
+     background-color: #ffffff;
+    border: none;
+    border-radius: 50%; /* Circular button */
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    cursor: pointer;
+    color: #5f6368;
+    padding-left: 10px;
+    font-size: 20px; /* For arrow emoji or icon */
+    transition: background-color 0.2s ease;
+}
+.back-to-details-btn svg {
+    margin-right: 8px; /* More space */
+    font-size: 1.1em;
+}
+.back-to-details-btn:hover {
+    background-color: #f1f3f4;
+}
+.internal-image-item-wrapper.editable.selected {
+    border-color: #007bff; /* Blue border */
+    box-shadow: 2px 2px 2px 2px rgba(255, 64, 0, 0.4); /* Orange-red shadow, 40% opacity */
+}
+/* Delete Selected Button */
+.manage-images-actions{
+    position: fixed;
+    margin-top: 15px;
+    margin-bottom: 15px;
+    display: flex;
+    justify-content: flex-end; /* Align to the right */
+}
+
+.delete-selected-images-btn {
+    background-color: #dc3545;
+    color: white;
+    padding: 8px 16px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 0.9em;
+    font-weight: 500;
+}
+.delete-selected-images-btn:hover:not(:disabled) {
+    background-color: #c82333;
+}
+.delete-selected-images-btn:disabled {
+    background-color: #e9ecef;
+    color: #6c757d;
+    cursor: not-allowed;
+}
+
+
+/* This already exists, ensure it's general enough */
+/* .add-internal-images-group { ... } */
+
+/* Button to go from Edit Album Details to Manage Images */
+.manage-images-from-edit-btn {
+    /* Inherits .secondary styles, adjust if needed */
+    margin-right: auto; /* Pushes save/cancel to the right in flex container */
+    flex-grow: 0 !important; 
+    padding: 12px 15px; /* Match other panel action buttons */
+}
+
+/* Ensure FABs don't overlap scrollbar of panel-content if panel-content becomes scrollable */
+.edit-pencil-button, .delete-trash-button {
+    z-index: 10; /* Keep above panel-content scrollbar */
+}
+.num-del {
+  position: absolute;
+  top: -6px;   /* Adjust this to move the number badge up or down. Negative values push it upwards. */
+  right: -6px; /* Adjust this to move the number badge left or right. Negative values push it rightwards. */
+  
+  background-color: white;      /* Background of the badge */
+  color: #e74c3c;               /* Text color of the number, matching the button's base color */
+  border: 1px solid #e74c3c;    /* Optional: border around the badge */
+  border-radius: 50%;           /* Makes the badge circular */
+  
+  font-size: 0.65em;            /* Makes the number smaller, relative to button's font-size */
+  font-weight: bold;
+  
+  min-width: 20px;              /* Ensures a minimum width for the circle, accommodating padding */
+  height: 20px;                 /* Fixed height for the badge */
+  padding: 0 4px;               /* Horizontal padding for numbers > 9 (e.g., "10+"). Adjust if needed. */
+  
+  display: flex;                /* For centering the number text within the badge */
+  align-items: center;
+  justify-content: center;
+  
+  box-sizing: border-box;       /* Ensures padding and border are included in the element's total width and height */
+  margin: 0;                    /* Overrides default <p> tag margins */
+  z-index: 1;                   /* Ensures the badge is rendered on top of the button/icon if overlap occurs */
+}
+
+/* Assuming this new button is also a FAB, like the delete button */
+.add-images-custom-button { /* This class is on the <label> */
+  position: absolute; /* Makes it a Floating Action Button */
+  /* Adjust positioning as needed. Example: bottom right */
+right: 24px;
+    bottom: 26px;
+
+  background-color: #f8fbfc; /* Same light background as your .delete-trash-button example */
+  
+  width: 50px;  /* Match size */
+  height: 50px; /* Match size */
+  border: none;
+  border-radius: 50%; /* Circular */
+  
+  font-size: 22px; /* For the FaPlus icon size, matches your example */
+  
+  display: flex; /* To center the icon */
+  align-items: center;
+  justify-content: center;
+  
+  cursor: pointer;
+  text-decoration: none; /* Labels sometimes get underlines from resets */
+  
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2); /* Match shadow */
+  transition: background-color 0.2s ease, transform 0.2s ease, box-shadow 0.2s ease; /* Match transition */
+  z-index: 5; /* Same stacking context level */
+}
+
+.add-images-custom-button:hover {
+  background-color: #e9ecef; /* Slightly darker grey for hover on a light button */
+  /* Or a tinted color, e.g., a very light blue: #e7f1ff */
+  transform: scale(1.10); /* Match transform */
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.25); /* Match shadow */
+}
+
+.add-images-custom-button:active {
+  transform: scale(0.95);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Common styling for ALL tiles (image wrappers and "View All" button wrapper) */
+.external-image-item-wrapper {
+  width: 80px;  /* Define the width of each tile */
+  height: 80px; /* Define the height of each tile (making it square) */
+  /* For responsive square tiles where width might be set by a grid parent, you could use:
+     min-width: 80px; 
+     aspect-ratio: 1 / 1; 
+  */
+  background-color: #f0f2f5; /* A light background, good for image placeholders or text tiles */
+  border: 1px solid #d9dcdf;
+  border-radius: 4px; /* Slightly rounded corners for tiles */
+  overflow: hidden;   /* Very important for image tiles with object-fit: cover */
+  
+  display: flex; /* To center content (text or image) within the tile */
+  align-items: center;
+  justify-content: center;
+  text-align: center; /* For text inside the "View All" button */
+  
+  cursor: pointer;
+  transition: transform 0.15s ease-out, box-shadow 0.15s ease-out;
+  box-sizing: border-box; /* Ensures padding and border don't increase the defined size */
+}
+
+.external-image-item-wrapper:hover {
+  transform: translateY(-2px); /* Slight lift effect on hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Subtle shadow on hover */
+}
+
+/* Styling for the image within an image tile */
+.external-image-item-wrapper .internal-image-thumbnail {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Image will cover the tile, maintain aspect ratio, and crop if needed */
+  display: block; /* Good practice for images */
+}
+
+.external-image-item-wrapper.view-all-button span {
+  font-size: 12px; /* Adjust text size as needed */
+  color: #343a40;   /* Text color */
+  padding: 5px;     /* A little padding around the text */
+  line-height: 1.25; /* For readability if text wraps (though "View All (X)" is usually short) */
+}
+
+/* Styling for the "No images" message */
+.empty-album-message {
+  color: #6c757d; /* Softer text color */
+  font-style: italic;
+  padding: 20px 10px; /* Give it some space */
+  text-align: center;
+  width: 100%; /* Ensure it takes full width if it's the only thing shown */
+}
+
+
+.album-external-images-section{
+    display: grid;
+      grid-template-columns: repeat(3, 134);
+        gap:7px;
+      max-width: 100%;
+      align-items: start;
+
+}
+.external-image-item-wrapper{
+    height: 120px;
+    width: 120px;
+}
+
+.internal-images-list{
+    display: block;
+}
+
+.internal-image-item-wrapper{
+    display: grid;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    width: 100%;
+    aspect-ratio: 1;
+    box-shadow: 0 12px 35px rgba(0, 0, 1, 0.18), 0 1px 2px rgba(0,0,0,0.12);
+
+}
+.internal-image-thumbnail {
+    width: inherit;
+    aspect-ratio: 1;
+    object-fit: cover;
+    
+}
+
+/*
+Make sure the parent of .panel-manage-images-mode (likely .panel-content)
+allows .panel-manage-images-mode to fill its height.
+If .panel-content is display: flex and flex-direction: column,
+.panel-manage-images-mode (as a child) should have flex-grow: 1 (which it does
+if it's one of the views swapped into panel-content which already has flex-grow:1).
+The height: 100% on panel-manage-images-mode should work in that context.
+*/
+
+/* Main container for the "Manage Images" view */
+.panel-manage-images-mode {
+    display: flex;
+    flex-direction: column;
+    height: 100%; /* Occupy full height of its designated area */
+    width: 100%;
+    box-sizing: border-box;
+    position: relative; /* Needed for the absolutely positioned FAB (.add-images-custom-button) */
+    
+}
+
+/* 1. Fixed Header */
+.panel-manage-images-mode .manage-images-header {
+    /* Existing styles (margins, padding, border, etc.) */
+    /* display: flex; align-items: center; etc. */
+
+    order: 1;         /* Ensures it's the first item in the flex order */
+    flex-shrink: 0;   /* Prevents the header from shrinking if space is limited */
+    
+}
+
+/* 2. Scrollable Content Area (wrapper for the image list) */
+.panel-manage-images-mode .edit-mode-internal-images {
+    /* Existing styles (background, border, border-radius, padding) */
+    /* background-color: #f8f9fa; border: 1px solid #e9ecef; etc. */
+
+    order: 2;         /* Second item in the flex order (middle section) */
+    flex-grow: 1;     /* Allows this section to expand and fill available vertical space */
+    overflow-y: auto; /* Enables vertical scrolling ONLY for this section when content overflows */
+    min-height: 2;    /* Crucial for scrollable flex children to prevent layout issues */
+                      /* Remove any max-height property from here if it exists */
+                      
+}
+.panel-manage-images-mode .edit-mode-internal-images::-webkit-scrollbar {
+    display: none; /* Hide the scrollbar */
+    /* You could also style it to be very thin or transparent, e.g.: */
+    /* width: 0px; */
+    /* background: transparent; */
+}
+/* The actual list of images within the scrollable area */
+/* 3. Fixed Bottom Actions Area (when selectedImageIds.size > 0) */
+.panel-manage-images-mode .manage-images-actions {
+    /* Existing styles (margins, display: flex, justify-content, etc.) */
+    /* margin-top: 15px; margin-bottom: 15px; etc. */
+
+    order: 3;         /* Third item in the flex order (footer) */
+    flex-shrink: 0;   /* Prevents this section from shrinking */
+}
