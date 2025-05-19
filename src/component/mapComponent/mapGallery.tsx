@@ -360,16 +360,13 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
 
                 mapInstance.invalidateSize();
                 setIsMapReady(true);
-            } catch (error) {
-                console.error("Error initializing Leaflet map:", error);
-            }
+            } catch (error) {            }
         };
 
         initializeMap();
 
         const handleResize = () => mapRef.current?.invalidateSize();
         window.addEventListener('resize', handleResize);
-
 
         return () => {
             window.removeEventListener('resize', handleResize);
