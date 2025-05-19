@@ -1,0 +1,123 @@
+.coreOffer {
+  padding: 4rem 2rem;
+  background-color: #F8F9FA;
+  text-align: center; 
+}
+
+.contentWrapper {
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.sectionTitle {
+  font-size: 2.2rem;
+  font-weight: 600;
+  color: var(--primary-text-color, #202124);
+  margin-bottom: 1rem;
+}
+
+.sectionSubtitle {
+  font-size: 1.1rem;
+  color: var(--secondary-text-color, #5F6368);
+  margin-bottom: 3rem;
+  max-width: 600px;
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.6;
+}
+
+.offerGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); 
+  gap: 2.5rem;
+}
+
+.offerItem {
+  background-color: #ffffff;
+  padding: 2rem;
+  border-radius: 20px; 
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start; 
+  text-align: left;
+}
+
+.offerItem:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.iconWrapper {
+  font-size: 2.2rem; 
+  color: var(--accent-color, #1a73e8);
+  line-height: 1;
+  margin-bottom: 1rem; 
+}
+
+.itemTitle {
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--primary-text-color, #202124);
+  margin-bottom: 0.5rem; 
+}
+
+.itemDescription {
+  font-size: 0.9rem; 
+  color: var(--secondary-text-color, #5F6368);
+  line-height: 1.6;
+}
+
+@media (max-width: 768px) {
+  .coreOffer {
+    padding: 3rem 1rem;
+  }
+  .sectionTitle {
+    font-size: 1.8rem;
+  }
+  .offerGrid {
+    gap: 1.5rem;
+  }
+  .offerItem {
+    padding: 1.5rem;
+    border-radius: 16px; 
+  }
+  .iconWrapper {
+    font-size: 2rem;
+    margin-bottom: 0.75rem;
+  }
+  .itemTitle {
+    font-size: 1.2rem;
+  }
+  .itemDescription {
+    font-size: 0.85rem;
+  }
+}
+
+.offerGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr); 
+  gap: 2.5rem; 
+}
+
+@media (max-width: 992px) { 
+  .offerGrid {
+    gap: 1.5rem; 
+  }
+}
+
+
+@media (max-width: 768px) { 
+  .coreOffer {
+    padding: 3rem 1rem;
+  }
+  .sectionTitle {
+    font-size: 1.8rem;
+  }
+  .offerGrid {
+    grid-template-columns: 1fr; 
+    gap: 2rem;
+  }
+}

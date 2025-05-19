@@ -1,39 +1,19 @@
-/* Styles for the main map container */
 .map-container {
   height: 100%;
   width: 100%;
 }
 
-/*
-Styles for the custom Leaflet labels pane.
-Leaflet creates panes with class names like 'leaflet-<paneName>-pane'.
-Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
-*/
-
-/*
-  Note on GeoJSON feature styling (like countries):
-  Leaflet's L.Path options (fillColor, weight, opacity, etc.) are typically applied
-  via JavaScript objects passed to layer.setStyle() or as options during GeoJSON creation.
-  While SVG elements (which Leaflet uses for GeoJSON) can be styled with CSS,
-  Leaflet's direct JS API for styling these paths is often more straightforward
-  and powerful for dynamic updates. The HIGHLIGHT_STYLE and INITIAL_GEOJSON_STYLE
-  objects in the JavaScript code serve this purpose.
-*/
-/* In mapStyles.css */
-/* In your mapStyles.css */
-
 .custom-map-image-icon.polaroid-style {
   background-color: white;
-  border: 1px solid #ccc; /* Light grey border for the polaroid */
-  padding: 10px; /* Space between the image and the polaroid edge */
-  padding-bottom: 40px; /* Larger bottom padding for text and the pin */
-  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2); /* Optional: adds a subtle shadow */
-  border-radius: 3px; /* Slightly rounded corners */
-  position: relative; /* Needed for positioning the pin and text */
-  box-sizing: border-box; /* Ensures padding and border are included in the element's total width and height */
+  border: 1px solid #ccc; 
+  padding: 10px; 
+  padding-bottom: 40px; 
+  box-shadow: 3px 3px 8px rgba(0, 0, 0, 0.2); 
+  border-radius: 3px; 
+  position: relative;
+  box-sizing: border-box; 
 }
 
-/* Styling for the actual image inside the polaroid container */
 .custom-map-image-icon.polaroid-style img {
   display: block;
   width: 100%;
@@ -57,17 +37,10 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
   font-style: italic; /* If you want italic text like in the example */
 }
 
-/*
-  Adjust the Leaflet icon pane so that our custom content (like the pin)
-  isn't clipped if it extends outside the icon's original bounds.
-*/
 .leaflet-marker-icon {
   overflow: visible !important;
 }
 
-/* In mapStyles.css */
-/* ... other styles ... */
-/* In mapStyles.css or your global stylesheet */
 .custom-map-marker-wrapper {
     /* background-color: rgba(0, 255, 0, 0.1); /* For debugging iconSize area */
     display: flex;
@@ -75,7 +48,6 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
     align-items: flex-start; /* Align paper to the top (considering pin space) */
 }
 
-/* In mapStyles.css or your global styles */
 
 .leaflet-polaroid-marker-wrapper {
     display: flex;
@@ -94,7 +66,6 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
 }
 
 .map-marker-polaroid-card {
-    /* width, height, paddings, margin-top are set by inline styles */
     background-color: #fefefe; /* Slightly off-white for aged paper */
     border: 1px solid #cacaca;
     box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3), -1px -1px 3px rgba(255,255,255,0.5); /* More distinct shadow */
@@ -112,23 +83,21 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
 }
 
 .map-marker-polaroid-pin {
-    /* font-size and top are set by inline styles */
     color: #444;
     position: absolute;
     left: 55%;
     transform: translateX(-50%) rotate(10deg);
     z-index: 10;
     pointer-events: none;
-    text-shadow: 1px 1px 2px rgba(0,0,0,0.2); /* Subtle shadow for pin */
+    text-shadow: 1px 1px 2px rgba(0,0,0,0.2); 
 }
 
 .map-marker-polaroid-image {
-    /* width, height, background-image, border-width are set by inline styles */
     background-size: cover;
     background-position: center center;
     background-repeat: no-repeat;
     border-style: solid;
-    border-color: #e0e0e0; /* Subtle border for the photo itself */
+    border-color: #e0e0e0; 
     box-shadow: inset 0 0 4px rgba(0,0,0,0.08);
 }
 
@@ -146,22 +115,17 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
 }
 
 .map-marker-caption-text {
-    /* font-size is set by inline styles */
-    font-family: 'Caveat', cursive; /* Ensure handwritten font is loaded */
+    font-family: 'Caveat', cursive;
     color: #3a3a3a;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
     padding: 0 3px;
     margin: 0;
-    line-height: 1.1; /* Adjust for better fit with dynamic font size */
+    line-height: 1.1; 
     max-width: 100%;
 }
 
-/* mapStyles.css or your dedicated search component CSS */
-/* mapStyles.css or your dedicated search component CSS */
-
-/* Container for the entire search UI (back button + search pill + dropdown) */
 .country-search-container.google-maps-style {
     position: absolute;
     top: 15px;
@@ -202,7 +166,6 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
     color: #757575;
 }
 
-/* General class for action buttons inside or next to the search pill */
 .search-action-button-gm {
     background-color: transparent;
     border: none;
@@ -220,9 +183,9 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
 
 
 .search-submit-icon-gm {
-    font-size: 20px; /* Adjust icon size */
-    padding-right: 16px; /* Padding on the right of the pill */
-    border-top-right-radius: 24px; /* Keep the pill shape */
+    font-size: 20px;
+    padding-right: 16px; 
+    border-top-right-radius: 24px; 
     border-bottom-right-radius: 24px;
 }
 
@@ -251,14 +214,8 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
 .search-results-dropdown-gm {
     position: absolute; /* Position relative to country-search-container */
     top: calc(100% + 6px); /* Below the search bar group */
-    left: 0; /* Align with the start of country-search-container */
-    /* If back button is present, you might want to align with search-input-wrapper-gm instead: */
-    /* left: 48px; /* Approx width of back button + gap */
+    left: 0; 
     width: calc(100% - 48px); /* Match width of search input wrapper if back button is there */
-    /* If no back button, or if relative to the search pill itself:
-    left: 0;
-    width: 100%; (relative to search-input-wrapper-gm if that's the positioned parent)
-    */
     background-color: #fff;
     border-radius: 8px; /* Softer radius for dropdown */
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
@@ -270,16 +227,11 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
     z-index: 1000; /* Below search bar but above map */
 }
 
-/* Adjust dropdown positioning if back button is part of the same positioned container */
-/* This example assumes .country-search-container is the reference for absolute positioning of the dropdown */
 .country-search-container.google-maps-style .search-results-dropdown-gm {
-    /* If the back button is present, the dropdown should align under the pill only */
     left: calc(40px + 8px); /* Width of back button + gap */
     width: auto; /* Let content define width, or set explicitly to match pill */
     min-width: var(--search-pill-width, 280px); /* Match pill's min-width */
 }
-/* You'll need to set --search-pill-width CSS variable on .search-input-wrapper-gm or country-search-container */
-
 
 .search-result-item-gm {
     padding: 10px 20px; /* More padding for items */
@@ -302,12 +254,6 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
     font-size: 18px;
 }
 
-/*
-  Styles for the map actions overlay and the "Add New Image" button.
-  This aims for a Google Material Design-inspired Floating Action Button (FAB) look.
-*/
-
-/* Container for action buttons like the "Add New Image" button */
 .map-actions-overlay {
   position: absolute; /* Positioned relative to its nearest positioned ancestor (e.g., the map container or a page wrapper) */
   top: 20px;          /* Distance from the top. Adjust if you have a search bar or other elements above it. */
@@ -320,41 +266,35 @@ Since we named our pane 'labels', the class is 'leaflet-labels-pane'.
   gap: 10px;           /* Space between multiple buttons if any */
 }
 
-/* Base styles that might be shared by other overlay buttons, if any.
-   The .add-new-image-button will override/extend these for its specific look. */
 .map-overlay-button {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 0; /* Reset padding, size will be controlled by width/height for circular buttons */
-  background-color: #ffffff; /* Default white background */
-  border: none;             /* FABs are typically borderless */
+  padding: 0; 
+  background-color: #ffffff; 
+  border: none;        
   cursor: pointer;
-  color: #5f6368; /* Google's standard dark grey icon color */
+  color: #5f6368; 
   transition: background-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out, transform 0.1s ease-in-out;
 }
 
-/* Specific styles for the circular "Add New Image" button */
 .add-new-image-button {
-  width: 48px;  /* Standard FAB diameter */
-  height: 48px; /* Standard FAB diameter */
-  border-radius: 24px; /* This makes the button circular */
-  /* Google Material Design shadow for FABs */
+  width: 48px;  
+  height: 48px; 
+  border-radius: 24px; 
   box-shadow: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
-  font-size: 24px; /* Adjust the size of the FaPlus icon. Default is often 1em (16px). */
+  font-size: 24px; 
 }
 
 .add-new-image-button:hover {
-  background-color: #f8f9fa; /* A very light grey, common for hover states in Google UIs */
-  /* Slightly more pronounced shadow on hover */
+  background-color: #f8f9fa; 
   box-shadow: 0 6px 12px rgba(0,0,0,0.18), 0 4px 8px rgba(0,0,0,0.25);
 }
 
 .add-new-image-button:active {
-  background-color: #f1f3f4; /* Slightly darker for pressed state */
-  /* Shadow might reduce slightly or change to simulate being pressed */
+  background-color: #f1f3f4; 
   box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.20);
-  transform: translateY(1px); /* Gives a subtle "pressed down" effect */
+  transform: translateY(1px); 
 }
 
 .add-new-image-button:disabled {

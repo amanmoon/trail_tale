@@ -1,0 +1,38 @@
+.navbar {
+  position: fixed; 
+  top: 0;
+  left: 0;
+  width: 100%;
+  background-color: #ffffff; 
+  padding: 15px 30px; 
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); 
+  z-index: 1000; 
+  height: 60px; 
+  box-sizing: border-box;
+}
+
+.navbarBrand .brandLink {
+  font-size: 1.6em; 
+  font-weight: 600;
+  color: #202124; 
+  text-decoration: none;
+}
+
+.navbarMenu .navLinkButton {
+  font-size: 0.95em;
+  color: #1a73e8; 
+  background-color: transparent;
+  padding: 10px 18px;
+  border-radius: 4px;
+  text-decoration: none;
+  font-weight: 500;
+  border: 1px solid transparent; 
+  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+}
+
+.navbarMenu .navLinkButton:hover {
+  color: #07326a;
+}

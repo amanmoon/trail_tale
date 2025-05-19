@@ -1,19 +1,20 @@
 "use client";
 
 import React, { useEffect, useRef, useCallback, useMemo, useState } from 'react';
-import { FaSearch, FaArrowLeft, FaPlus } from 'react-icons/fa'; // Added FaPlus
-
+import { FaSearch, FaArrowLeft, FaPlus } from 'react-icons/fa';
+import { GalleryPageProps, CountryFeatureProperties, CountryFeature } from '@/interfaces/interface';
 import 'leaflet/dist/leaflet.css';
 import './mapStyles.css';
-import './ImageEditPanel.css';
+import '../imageEditPannel/ImageEditPanel.css';
 
 import type { Map, GeoJSON, Layer, LeafletMouseEvent, LatLngBoundsLiteral, LatLngTuple, Path, LayerGroup, LeafletEventHandlerFn, FeatureGroup } from 'leaflet';
 import type LType from 'leaflet';
 
-import { updateImageMarkersOnMap, type ImageInfo } from './imageMarkerUtils'; // Ensure ImageInfo allows lat/lng to be initially 0 or handled
-import { ImageEditPanel, type CurrentPanelFormData } from './ImageEditPanel'; // Ensure CurrentPanelFormData is exported from ImageEditPanel if not already
+import { updateImageMarkersOnMap } from '../imageEditPannel/imageMarkerUtils';
+import { ImageEditPanel } from '../imageEditPannel/ImageEditPanel';
+import { type CurrentPanelFormData, type ImageInfo, type ImageItem } from '@/interfaces/interface';
+import Link from 'next/link';
 
-// ... (Constants remain the same) ...
 const MAP_CENTER: LatLngTuple = [20, 0];
 const INITIAL_ZOOM: number = 3.2;
 const MIN_ZOOM: number = 3;
@@ -28,10 +29,6 @@ const GEOJSON_URL: string = 'https://raw.githubusercontent.com/johan/world.geo.j
 const INITIAL_GEOJSON_STYLE = { weight: 0, opacity: 0, fillOpacity: 0 };
 const HIGHLIGHT_STYLE = { weight: 2.5, color: '#e60000', fillOpacity: 0.5, fillColor: '#ffcccb', lineCap: 'round' as import('leaflet').LineCapShape, lineJoin: 'round' as import('leaflet').LineJoinShape };
 
-interface CountryFeatureProperties { name: string; }
-interface CountryFeature extends GeoJSON.Feature<GeoJSON.Geometry, CountryFeatureProperties> { }
-interface GalleryPageProps { imagesData: ImageInfo[]; }
-
 const countrySpecificAdjustments: Record<string, { center?: [number, number]; zoomFactor?: number; fixedLng?: number; fixedLat?: number }> = {
     'Russia': { fixedLng: 95, zoomFactor: 1.3 },
     'United States of America': { fixedLat: 39.8283, fixedLng: -98.5795, zoomFactor: 1.7 },
@@ -42,6 +39,9 @@ const countrySpecificAdjustments: Record<string, { center?: [number, number]; zo
 const IMAGE_MARKER_DEBOUNCE_TIME = 250;
 const MAP_PICK_CURSOR_CLASS = 'leaflet-crosshair';
 
+// Helper to generate unique IDs (you should have a robust one in your utils)
+const generatePageUniqueId = (prefix: string = "id") => `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
+
 function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
     let timeoutId: ReturnType<typeof setTimeout> | null = null;
     return (...args: Parameters<F>): void => {
@@ -50,8 +50,7 @@ function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
     };
 }
 
-
-export default function GalleryPage({ imagesData: initialImagesData }: GalleryPageProps) {
+export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPageProps) {
     const mapRef = useRef<Map | null>(null);
     const mapContainerRef = useRef<HTMLDivElement | null>(null);
     const geoJsonLayerRef = useRef<GeoJSON<CountryFeatureProperties> | null>(null);
@@ -59,71 +58,81 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
     const LRef = useRef<typeof LType | null>(null);
     const imageMarkersLayerRef = useRef<LayerGroup | null>(null);
 
-    const [imagesData, setImagesData] = useState<ImageInfo[]>(initialImagesData);
-    const [editingImage, setEditingImage] = useState<ImageInfo | null>(null);
-    const [isPanelOpen, setIsPanelOpen] = useState<boolean>(false);
-    const [pickingLocationForImageId, setPickingLocationForImageId] = useState<string | null>(null);
+    const [albumsData, setAlbumsData] = useState<ImageInfo[]>(initialAlbumsData);
+    const [editingAlbum, setEditingAlbum] = useState<ImageInfo | null>(null);
+    const [isEditPanelOpen, setIsEditPanelOpen] = useState<boolean>(false);
+
+    const [pickingLocationForAlbumId, setPickingLocationForAlbumId] = useState<string | null>(null);
+    const pickingLocationForAlbumIdRef = useRef(pickingLocationForAlbumId);
+
     const [isMapReady, setIsMapReady] = useState<boolean>(false);
     const [searchQuery, setSearchQuery] = useState<string>("");
     const [searchResults, setSearchResults] = useState<CountryFeature[]>([]);
     const [isSearchDropdownOpen, setIsSearchDropdownOpen] = useState<boolean>(false);
     const allCountryFeaturesRef = useRef<CountryFeature[]>([]);
-    const pickingLocationForImageIdRef = useRef(pickingLocationForImageId);
     const searchContainerRef = useRef<HTMLDivElement>(null);
 
-    // --- States for New Image Workflow ---
-    const [isNewImagePanelOpen, setIsNewImagePanelOpen] = useState<boolean>(false);
-    const [newImageDraft, setNewImageDraft] = useState<ImageInfo | null>(null);
-    // --- End New Image Workflow States ---
+    const [isNewAlbumPanelOpen, setIsNewAlbumPanelOpen] = useState<boolean>(false);
+    const [newAlbumDraft, setNewAlbumDraft] = useState<ImageInfo | null>(null); // This is an ImageInfo (album) object
 
     useEffect(() => {
-        pickingLocationForImageIdRef.current = pickingLocationForImageId;
-    }, [pickingLocationForImageId]);
+        pickingLocationForAlbumIdRef.current = pickingLocationForAlbumId;
+    }, [pickingLocationForAlbumId]);
 
-    const handleImageClick = useCallback((image: ImageInfo) => {
-        if (pickingLocationForImageIdRef.current) return; // Don't open panel if already picking location
-        setNewImageDraft(null); // Ensure new image panel is closed
-        setIsNewImagePanelOpen(false);
-        setEditingImage(image);
-        setIsPanelOpen(true);
+    // Called when an album marker on the map is clicked
+    const handleAlbumMarkerClick = useCallback((album: ImageInfo) => {
+        if (pickingLocationForAlbumIdRef.current) return;
+        setNewAlbumDraft(null);
+        setIsNewAlbumPanelOpen(false);
+
+        setEditingAlbum(album);
+        setIsEditPanelOpen(true);
     }, []);
 
-    const handlePanelClose = useCallback(() => {
-        setIsPanelOpen(false);
-        setEditingImage(null);
+    const handleEditPanelClose = useCallback(() => {
+        setIsEditPanelOpen(false);
+        setEditingAlbum(null);
     }, []);
 
-    const handlePanelSave = useCallback((updatedImage: ImageInfo) => {
-        setImagesData(prevImagesData =>
-            prevImagesData.map(img => (img.id === updatedImage.id ? updatedImage : img))
+    // Called when an existing album's details are saved from the panel
+    const handleEditPanelSave = useCallback((updatedAlbum: ImageInfo) => {
+        setAlbumsData(prevAlbums =>
+            prevAlbums.map(album => (album.id === updatedAlbum.id ? updatedAlbum : album))
         );
-        setIsPanelOpen(false);
-        setEditingImage(null);
+        setIsEditPanelOpen(false);
+        setEditingAlbum(null);
     }, []);
 
+    // Handlers for New Album Workflow 
+    const openNewAlbumPanel = () => {
+        setEditingAlbum(null); // Close regular edit panel if open
+        setIsEditPanelOpen(false);
 
-    // --- Handlers for New Image Workflow ---
-    const openNewImagePanel = () => {
-        setEditingImage(null); // Close regular edit panel
-        setIsPanelOpen(false);
-
-        setNewImageDraft({
-            id: "NEW_IMAGE_TEMP_ID", // Temporary ID for panel logic
+        const defaultCover: ImageItem = {
+            id: generatePageUniqueId("imgItem_cover_new"),
             url: "",
-            caption: "",
+            dateAdded: new Date().toISOString(),
+        };
+        setNewAlbumDraft({
+            id: "NEW_IMAGE_TEMP_ID",
+            title: "",
             description: "",
-            date: new Date().toISOString().split('T')[0], // Default to today
-            lat: 0, // Initial value, panel can interpret this for "Pick Location"
-            lng: 0, // Initial value
+            albumCover: defaultCover,
+            images: [],
+            lat: 0,
+            lng: 0,
+            country: "",
+            dateCreated: new Date().toISOString().split('T')[0], // Default to today
+            lastUpdated: new Date().toISOString(),
         });
-        setIsNewImagePanelOpen(true);
+        setIsNewAlbumPanelOpen(true);
     };
 
-    const handleCloseNewImagePanel = () => {
-        setIsNewImagePanelOpen(false);
-        setNewImageDraft(null);
-        if (pickingLocationForImageIdRef.current === "NEW_IMAGE_TEMP_ID") {
-            setPickingLocationForImageId(null); // Clear picker if new image panel is closed
+    const handleCloseNewAlbumPanel = () => {
+        setIsNewAlbumPanelOpen(false);
+        setNewAlbumDraft(null);
+        if (pickingLocationForAlbumIdRef.current === "NEW_IMAGE_TEMP_ID") {
+            setPickingLocationForAlbumId(null);
             if (mapContainerRef.current) {
                 mapContainerRef.current.classList.remove(MAP_PICK_CURSOR_CLASS);
                 mapContainerRef.current.style.cursor = '';
@@ -131,98 +140,109 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
         }
     };
 
-    const handleSaveNewImage = (imageToSave: ImageInfo) => {
-        if (imageToSave.lat === 0 && imageToSave.lng === 0 && imageToSave.id === "NEW_IMAGE_TEMP_ID") {
-            // Or use !imageToSave.lat || !imageToSave.lng if they can be undefined
-            alert("Please pick a location on the map for the new image.");
+    const handleSaveNewAlbum = (albumToSave: ImageInfo) => {
+        if (!albumToSave.albumCover.url) {
+            alert("Please provide an Album Cover Image Key or upload a cover image for the new album.");
             return; // Keep panel open
         }
-        const newImageWithPermanentId: ImageInfo = {
-            ...imageToSave,
-            id: Date.now().toString(), // Generate a real unique ID
+        if (albumToSave.lat === 0 && albumToSave.lng === 0 && albumToSave.id === "NEW_IMAGE_TEMP_ID") {
+            alert("Please pick a location on the map for the new album.");
+            return; // Keep panel open
+        }
+
+        const newAlbumWithPermanentId: ImageInfo = {
+            ...albumToSave,
+            id: generatePageUniqueId("album"), // Generate a real unique ID for the album
+            dateCreated: albumToSave.dateCreated || new Date().toISOString(),
+            lastUpdated: new Date().toISOString(),
         };
-        setImagesData(prevImagesData => [...prevImagesData, newImageWithPermanentId]);
-        handleCloseNewImagePanel();
+        setAlbumsData(prevAlbums => [...prevAlbums, newAlbumWithPermanentId]);
+        handleCloseNewAlbumPanel();
     };
 
-    const startPickLocationForNewImage = useCallback((currentFormData: CurrentPanelFormData) => {
-        setIsNewImagePanelOpen(false);
-        if (newImageDraft) {
-            setNewImageDraft(prevDraft => ({
-                ...(prevDraft as ImageInfo), // prevDraft is asserted to be ImageInfo
-                ...currentFormData, // Update with current form data from panel
-            }));
-            setPickingLocationForImageId("NEW_IMAGE_TEMP_ID");
-            // Panel remains open
+    const startPickLocationForNewAlbum = useCallback((currentFormData: CurrentPanelFormData) => {
+        setIsNewAlbumPanelOpen(false); // Keep the new album panel technically "open" but hidden by map interaction
+        if (newAlbumDraft) {
+            setNewAlbumDraft(prevDraft => {
+                if (!prevDraft) return null;
+                // Update draft with current form values before hiding panel for map picking
+                const updatedCover = (currentFormData.albumCoverUrl && currentFormData.albumCoverUrl !== prevDraft.albumCover.url)
+                    ? { id: prevDraft.albumCover.id || generatePageUniqueId("imgItem_cover_pick"), url: currentFormData.albumCoverUrl, dateAdded: new Date().toISOString() }
+                    : prevDraft.albumCover;
+
+                return {
+                    ...prevDraft,
+                    title: currentFormData.title,
+                    description: currentFormData.description,
+                    albumCover: updatedCover,
+                    dateCreated: currentFormData.albumDate || prevDraft.dateCreated, // Assuming albumDate is dateCreated
+                };
+            });
+            setPickingLocationForAlbumId("NEW_IMAGE_TEMP_ID");
             if (mapContainerRef.current) {
                 mapContainerRef.current.classList.add(MAP_PICK_CURSOR_CLASS);
                 mapContainerRef.current.style.cursor = 'crosshair';
             }
         }
-    }, [newImageDraft]); // Added newImageDraft dependency
+    }, [newAlbumDraft]);
 
+    const startPickLocationForExistingAlbum = useCallback((currentFormDataFromPanel: CurrentPanelFormData) => {
+        setIsEditPanelOpen(false);
+        if (editingAlbum) {
+            const updatedCover = (currentFormDataFromPanel.albumCoverUrl && currentFormDataFromPanel.albumCoverUrl !== editingAlbum.albumCover.url)
+                ? { id: editingAlbum.albumCover.id || generatePageUniqueId("imgItem_cover_pick_edit"), url: currentFormDataFromPanel.albumCoverUrl, dateAdded: new Date().toISOString() }
+                : editingAlbum.albumCover;
 
-    const handleStartPickLocationForExistingImage = useCallback((currentFormDataFromPanel: CurrentPanelFormData) => {
-        setIsPanelOpen(false);
-        if (editingImage) {
-            // Persist any intermediate edits from the panel before going to pick location
-            const updatedImageWithFormValues = {
-                ...editingImage,
-                ...currentFormDataFromPanel
+            const updatedAlbumWithFormValues: ImageInfo = {
+                ...editingAlbum,
+                title: currentFormDataFromPanel.title,
+                description: currentFormDataFromPanel.description,
+                albumCover: updatedCover,
             };
-            setEditingImage(updatedImageWithFormValues);
-            // Optionally update in imagesData immediately if panel doesn't do it before calling this
-            setImagesData(currentImages => currentImages.map(img => img.id === editingImage.id ? updatedImageWithFormValues : img));
-
-            setPickingLocationForImageId(editingImage.id);
-            // Panel remains open
+            setEditingAlbum(updatedAlbumWithFormValues);
+            setPickingLocationForAlbumId(editingAlbum.id);
             if (mapContainerRef.current) {
                 mapContainerRef.current.classList.add(MAP_PICK_CURSOR_CLASS);
                 mapContainerRef.current.style.cursor = 'crosshair';
             }
         }
-    }, [editingImage, setEditingImage, setImagesData]);
-    // --- End Handlers for New Image Workflow ---
-
-
+    }, [editingAlbum]);
     const mapClickLogicHandler = useCallback((e: LeafletMouseEvent) => {
-        const currentPickerId = pickingLocationForImageIdRef.current;
+        const currentPickerId = pickingLocationForAlbumIdRef.current;
         if (currentPickerId && LRef.current) {
             const { lat, lng } = e.latlng;
 
             if (currentPickerId === "NEW_IMAGE_TEMP_ID") {
-                setNewImageDraft(prevDraft => {
+                setNewAlbumDraft(prevDraft => {
                     if (!prevDraft) return null;
-                    return { ...prevDraft, lat, lng };
+                    return { ...prevDraft, lat, lng, lastUpdated: new Date().toISOString() };
                 });
-                setIsNewImagePanelOpen(true);
-
-                // New image panel is already open and will re-render with new lat/lng.
+                setIsNewAlbumPanelOpen(true);
             } else {
-                let imageToReEdit: ImageInfo | null = null;
-                setImagesData(prevImagesData =>
-                    prevImagesData.map(img => {
-                        if (img.id === currentPickerId) {
-                            const updated = { ...img, lat, lng };
-                            imageToReEdit = updated;
+                let albumToReEdit: ImageInfo | null = null;
+                setAlbumsData(prevAlbums =>
+                    prevAlbums.map(album => {
+                        if (album.id === currentPickerId) {
+                            const updated = { ...album, lat, lng, lastUpdated: new Date().toISOString() };
+                            albumToReEdit = updated;
                             return updated;
                         }
-                        return img;
+                        return album;
                     })
                 );
-                if (imageToReEdit) {
-                    setEditingImage(imageToReEdit); // Update editingImage to reflect new coords
-                    // setIsPanelOpen(true); // Panel should have remained open
+                if (albumToReEdit) {
+                    setEditingAlbum(albumToReEdit);
+                    setIsEditPanelOpen(true);
                 }
             }
 
-            setPickingLocationForImageId(null);
+            setPickingLocationForAlbumId(null);
             if (mapContainerRef.current) {
                 mapContainerRef.current.classList.remove(MAP_PICK_CURSOR_CLASS);
                 mapContainerRef.current.style.cursor = '';
             }
         }
-    }, [setImagesData, setNewImageDraft, setEditingImage]); // Dependencies updated
+    }, [setAlbumsData, setNewAlbumDraft, setEditingAlbum]);
 
 
     const mapClickLogicHandlerRef = useRef(mapClickLogicHandler);
@@ -230,25 +250,27 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
         mapClickLogicHandlerRef.current = mapClickLogicHandler;
     }, [mapClickLogicHandler]);
 
-    const updateImageMarkersCallback = useCallback(() => {
+    // Update markers when albumsData changes or when map becomes ready
+    const updateAlbumMarkersCallback = useCallback(() => {
         const L = LRef.current;
         const map = mapRef.current;
-        const imagesLayer = imageMarkersLayerRef.current;
-        if (!L || !map || !imagesLayer) return;
-        updateImageMarkersOnMap({ L, map, imagesLayer, imagesData, onImageClick: handleImageClick });
-    }, [imagesData, handleImageClick]);
+        const layer = imageMarkersLayerRef.current;
+        if (!L || !map || !layer) return;
+        updateImageMarkersOnMap({ L, map, imagesLayer: layer, imagesData: albumsData, onImageClick: handleAlbumMarkerClick });
+    }, [albumsData, handleAlbumMarkerClick]);
 
-    const debouncedUpdateImageMarkers = useMemo(() => {
-        return debounce(updateImageMarkersCallback, IMAGE_MARKER_DEBOUNCE_TIME);
-    }, [updateImageMarkersCallback]);
+    const debouncedUpdateAlbumMarkers = useMemo(() => {
+        return debounce(updateAlbumMarkersCallback, IMAGE_MARKER_DEBOUNCE_TIME);
+    }, [updateAlbumMarkersCallback]);
 
+
+    // Effect for initializing map
     useEffect(() => {
-        // ... (map initialization logic - no changes here, but ensure it's complete)
         let L_instance: typeof LType | null = null;
         let mapInstance: Map | null = null;
 
         const highlightFeature = (e: LeafletMouseEvent, feature: CountryFeature) => {
-            if (pickingLocationForImageIdRef.current) return;
+            if (pickingLocationForAlbumIdRef.current) return;
             if (!mapRef.current || !feature.properties) return;
             if (zoomedCountryNameRef.current !== feature.properties.name && (mapRef.current?.getZoom() ?? 0) < 10) {
                 const layer = e.target as Path;
@@ -256,13 +278,11 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
                 if (layer.bringToFront) layer.bringToFront();
             }
         };
-
         const resetHighlight = (e: LeafletMouseEvent) => {
             (e.target as Path).setStyle(INITIAL_GEOJSON_STYLE);
         };
-
         const zoomToFeature = (e: LeafletMouseEvent, feature: CountryFeature) => {
-            if (pickingLocationForImageIdRef.current) return;
+            if (pickingLocationForAlbumIdRef.current) return;
             resetHighlight(e);
             const layer = e.target as Path;
             const map = mapRef.current;
@@ -285,35 +305,32 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
             if (map.options.minZoom !== undefined) targetZoom = Math.max(targetZoom, map.options.minZoom);
             map.flyTo(wrappedCenter, targetZoom);
         };
-
         const onEachFeature = (feature: CountryFeature, layer: Layer) => {
             layer.on({
                 mouseover: (e: LeafletMouseEvent) => highlightFeature(e, feature),
                 mouseout: resetHighlight,
                 click: (e: LeafletMouseEvent) => {
-                    if (pickingLocationForImageIdRef.current) {
-                        // If picking location, map click should be handled by mapClickLogicHandler
+                    if (pickingLocationForAlbumIdRef.current) {
                         return;
                     }
                     zoomToFeature(e, feature);
                 },
             });
         };
-
-        const loadGeoJsonData = async (mapInstance: Map, leaflet: typeof LType) => {
+        const loadGeoJsonData = async (mapInst: Map, leaflet: typeof LType) => {
             try {
                 const response = await fetch(GEOJSON_URL);
                 if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                 const geoJsonData = await response.json() as GeoJSON.FeatureCollection<GeoJSON.Geometry, CountryFeatureProperties>;
                 allCountryFeaturesRef.current = geoJsonData.features.map(f => f as CountryFeature);
 
-                if (geoJsonLayerRef.current && mapInstance.hasLayer(geoJsonLayerRef.current)) {
-                    mapInstance.removeLayer(geoJsonLayerRef.current);
+                if (geoJsonLayerRef.current && mapInst.hasLayer(geoJsonLayerRef.current)) {
+                    mapInst.removeLayer(geoJsonLayerRef.current);
                 }
                 geoJsonLayerRef.current = leaflet.geoJSON(geoJsonData, {
                     style: () => INITIAL_GEOJSON_STYLE,
                     onEachFeature: onEachFeature,
-                }).addTo(mapInstance);
+                }).addTo(mapInst);
             } catch (error) {
                 console.error('Error loading or processing GeoJSON data:', error);
             }
@@ -324,7 +341,6 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
             try {
                 L_instance = await import('leaflet');
                 LRef.current = L_instance;
-
                 mapInstance = L_instance.map(mapContainerRef.current!, {
                     center: MAP_CENTER, zoom: INITIAL_ZOOM, maxBounds: L_instance.latLngBounds(WORLD_BOUNDS),
                     maxBoundsViscosity: MAX_BOUNDS_VISCOSITY, minZoom: MIN_ZOOM, maxZoom: MAX_ZOOM,
@@ -339,7 +355,6 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
                     imageMarkersLayerRef.current = L_instance.layerGroup().addTo(mapInstance);
                 }
 
-                // Use the stable ref for the map click handler
                 const stableMapClickHandler = (e: LeafletMouseEvent) => mapClickLogicHandlerRef.current(e);
                 mapInstance.on('click', stableMapClickHandler as LeafletEventHandlerFn);
 
@@ -347,19 +362,20 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
                 setIsMapReady(true);
             } catch (error) {
                 console.error("Error initializing Leaflet map:", error);
-                setIsMapReady(false);
             }
         };
 
         initializeMap();
+
         const handleResize = () => mapRef.current?.invalidateSize();
         window.addEventListener('resize', handleResize);
+
 
         return () => {
             window.removeEventListener('resize', handleResize);
             setIsMapReady(false);
             if (mapInstance) {
-                mapInstance.off('click'); // Clean up click listener
+                mapInstance.off('click');
                 if (geoJsonLayerRef.current && mapInstance.hasLayer(geoJsonLayerRef.current)) mapInstance.removeLayer(geoJsonLayerRef.current);
                 if (imageMarkersLayerRef.current && mapInstance.hasLayer(imageMarkersLayerRef.current)) mapInstance.removeLayer(imageMarkersLayerRef.current);
                 mapInstance.remove();
@@ -375,32 +391,35 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
     }, []);
 
 
+    // Effect for updating markers on map events
     useEffect(() => {
         const map = mapRef.current;
         if (isMapReady && map) {
-            const handler = debouncedUpdateImageMarkers;
+            const handler = debouncedUpdateAlbumMarkers;
             map.on('zoomend moveend', handler);
             return () => {
                 map.off('zoomend moveend', handler);
             };
         }
-    }, [isMapReady, debouncedUpdateImageMarkers]);
+    }, [isMapReady, debouncedUpdateAlbumMarkers]);
 
+    // Effect for initial marker update and when albumsData changes
     useEffect(() => {
         if (isMapReady && mapRef.current && LRef.current && imageMarkersLayerRef.current) {
-            updateImageMarkersCallback();
+            updateAlbumMarkersCallback();
         }
-    }, [isMapReady, imagesData, updateImageMarkersCallback]);
+    }, [isMapReady, albumsData, updateAlbumMarkersCallback]); // updateAlbumMarkersCallback depends on albumsData
 
+    // Effect to update local albumsData state if initial prop changes
     useEffect(() => {
-        setImagesData(initialImagesData);
-    }, [initialImagesData]);
+        setAlbumsData(initialAlbumsData);
+    }, [initialAlbumsData]);
 
-    const handleDeleteImage = useCallback((imageIdToDelete: string) => {
-        setImagesData(currentImagesData =>
-            currentImagesData.filter(image => image.id !== imageIdToDelete)
+    // Handler for deleting an album (passed to ImageEditPanel)
+    const handleDeleteAlbum = useCallback((albumIdToDelete: string) => {
+        setAlbumsData(currentAlbums =>
+            currentAlbums.filter(album => album.id !== albumIdToDelete)
         );
-        // Panel closes itself after calling onDelete
     }, []);
 
 
@@ -420,9 +439,7 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
         setSearchResults(filteredResults.slice(0, 10));
         setIsSearchDropdownOpen(filteredResults.length > 0);
     };
-
     const flyToCountry = useCallback((feature: CountryFeature) => {
-        // ... (flyToCountry logic remains the same)
         const map = mapRef.current;
         const L = LRef.current;
 
@@ -487,11 +504,9 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
         setSearchResults([]);
         setIsSearchDropdownOpen(false);
     }, [mapRef, LRef]);
-
     const handleSearchResultClick = (feature: CountryFeature) => {
         flyToCountry(feature);
     };
-
     useEffect(() => {
         function handleClickOutside(event: MouseEvent) {
             if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -504,61 +519,29 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
         };
     }, [searchContainerRef]);
 
-    const handleBackButtonClick = () => {
-        setSearchQuery("");
-        setSearchResults([]);
-        setIsSearchDropdownOpen(false);
-    };
 
     return (
         <>
             <div ref={searchContainerRef} className="country-search-container google-maps-style">
-                <button
-                    type="button"
-                    className="search-back-button-gm"
-                    onClick={handleBackButtonClick}
-                    aria-label="Clear search or go back"
-                >
-                    <FaArrowLeft />
-                </button>
+                <Link href="/" className="search-back-button-gm" aria-label="Clear search or go back"><FaArrowLeft /></Link>
                 <div className="search-input-wrapper-gm">
-                    <input
-                        type="text"
-                        className="search-input-field-gm"
-                        placeholder="Search for a country..."
-                        value={searchQuery}
-                        onChange={handleSearchChange}
-                        onFocus={() => searchQuery && searchResults.length > 0 && setIsSearchDropdownOpen(true)}
-                    />
-                    <button type="button" className="search-action-button-gm search-submit-icon-gm" aria-label="Search" >
-                        <FaSearch />
-                    </button>
+                    <input type="text" className="search-input-field-gm" placeholder="Search for a country..." value={searchQuery} onChange={handleSearchChange} onFocus={() => searchQuery && searchResults.length > 0 && setIsSearchDropdownOpen(true)} />
+                    <button type="button" className="search-action-button-gm search-submit-icon-gm" aria-label="Search" > <FaSearch /> </button>
                 </div>
                 {isSearchDropdownOpen && searchResults.length > 0 && (
                     <ul className="search-results-dropdown-gm">
-                        {searchResults.map(feature => (
-                            <li
-                                key={feature.properties.name}
-                                onClick={() => handleSearchResultClick(feature)}
-                                className="search-result-item-gm"
-                                tabIndex={0}
-                                onKeyDown={(e) => { if (e.key === 'Enter') handleSearchResultClick(feature); }}
-                            >
-                                {feature.properties.name}
-                            </li>
-                        ))}
+                        {searchResults.map(feature => (<li key={feature.properties.name} onClick={() => handleSearchResultClick(feature)} className="search-result-item-gm" tabIndex={0} onKeyDown={(e) => { if (e.key === 'Enter') handleSearchResultClick(feature); }} > {feature.properties.name} </li>))}
                     </ul>
                 )}
             </div>
 
-            {/* Container for map overlay buttons like "Add New Image" */}
             <div className="map-actions-overlay">
                 <button
-                    onClick={openNewImagePanel}
+                    onClick={openNewAlbumPanel}
                     className="map-overlay-button add-new-image-button"
-                    aria-label="Add new image"
-                    title="Add new image"
-                    disabled={pickingLocationForImageId !== null} // Disable if already picking location
+                    aria-label="Add new album"
+                    title="Add new album"
+                    disabled={pickingLocationForAlbumId !== null}
                 >
                     <FaPlus />
                 </button>
@@ -566,27 +549,25 @@ export default function GalleryPage({ imagesData: initialImagesData }: GalleryPa
 
             <div ref={mapContainerRef} className="map-container" aria-label="Interactive world map"></div>
 
-            {/* Panel for NEW images */}
-            {isNewImagePanelOpen && newImageDraft && (
+            {isNewAlbumPanelOpen && newAlbumDraft && (
                 <ImageEditPanel
-                    imageInfo={newImageDraft}
-                    onSave={handleSaveNewImage}
-                    onClose={handleCloseNewImagePanel}
-                    isOpen={isNewImagePanelOpen}
-                    onStartPickLocation={startPickLocationForNewImage}
-                    onDelete={() => { /* Delete shouldn't be available for a new, unsaved image */ }}
+                    imageInfo={newAlbumDraft}
+                    onSave={handleSaveNewAlbum}
+                    onClose={handleCloseNewAlbumPanel}
+                    isOpen={isNewAlbumPanelOpen}
+                    onStartPickLocation={startPickLocationForNewAlbum}
+                    onDelete={() => { }}
                 />
             )}
 
-            {/* Panel for EDITING existing images */}
-            {isPanelOpen && editingImage && (
+            {isEditPanelOpen && editingAlbum && (
                 <ImageEditPanel
-                    imageInfo={editingImage}
-                    onSave={handlePanelSave}
-                    onClose={handlePanelClose}
-                    isOpen={isPanelOpen}
-                    onStartPickLocation={handleStartPickLocationForExistingImage}
-                    onDelete={handleDeleteImage}
+                    imageInfo={editingAlbum} // editingAlbum is an ImageInfo (album)
+                    onSave={handleEditPanelSave}
+                    onClose={handleEditPanelClose}
+                    isOpen={isEditPanelOpen}
+                    onStartPickLocation={startPickLocationForExistingAlbum}
+                    onDelete={handleDeleteAlbum} // Changed from handleDeleteImage
                 />
             )}
         </>

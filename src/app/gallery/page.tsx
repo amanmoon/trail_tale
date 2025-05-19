@@ -1,50 +1,87 @@
 "use client";
 
-import MapGallery from "./mapGallery";
-import Navbar from "@/components/navbar";
-
-export interface ImageInfo {
-    id: string;
-    lat: number;
-    lng: number;
-    url: string;
-    country?: string;
-    caption?: string;
-    description?: string;
-    date?: string; // New: Timestamp (ISO string format recommended for datetime-local input)
-}
-
-interface GalleryPageProps {
-    imagesData: ImageInfo[]; // This will be the new prop
-}
-
-const myImages: ImageInfo[] = [
+import React from 'react';
+import MapGallery from "../../component/mapComponent/mapGallery";
+import { ImageInfo } from '@/interfaces/interface';
+const sampleAlbums: ImageInfo[] = [
     {
-        id: 'img1', lat: 51.505, lng: -0.09, url: 'https://plus.unsplash.com/premium_photo-1671734045856-88673602ef20?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', country: 'United Kingdom', caption:
-            '', description: '', date: "2025-05-18"
+        id: 'album1',
+        title: 'London Adventures',
+        description: 'A collection of moments from my trip to London.',
+        albumCover: {
+            id: 'cover_london',
+            url: 'https://images.unsplash.com/photo-1533929736458-ca588d08c8be?q=80&w=800&auto=format&fit=crop', // Placeholder
+            dateAdded: '2025-05-10T10:00:00Z',
+        },
+        images: [
+            { id: 'london_img1', url: 'https://images.unsplash.com/photo-1505761671935-60b3a7427508?q=80&w=800&auto=format&fit=crop', dateAdded: '2025-05-10T10:05:00Z' },
+            { id: 'london_img2', url: 'https://images.unsplash.com/photo-1529655683826-1c92cf25b5c7?q=80&w=800&auto=format&fit=crop', dateAdded: '2025-05-10T10:10:00Z' },
+        ],
+        lat: 51.505,
+        lng: -0.09,
+        country: 'United Kingdom',
+        dateCreated: '2025-05-10T09:00:00Z',
+        lastUpdated: '2025-05-11T14:30:00Z',
     },
     {
-        id: 'img2', lat: 51.515, lng: -0.10, url: 'https://plus.unsplash.com/premium_photo-1679470210717-97fc30968fdf?q=80&w=1974&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', country: 'United Kingdom', caption:
-            '', description: '', date: "2025-05-18"
+        id: 'album2',
+        title: 'Parisian Dreams',
+        description: 'Exploring the beautiful city of Paris.',
+        albumCover: {
+            id: 'cover_paris',
+            url: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?q=80&w=800&auto=format&fit=crop', // Placeholder
+            dateAdded: '2025-04-20T11:00:00Z',
+        },
+        images: [
+            { id: 'paris_img1', url: 'https://images.unsplash.com/photo-1431274172761-fca41d930114?q=80&w=800&auto=format&fit=crop', dateAdded: '2025-04-20T11:05:00Z' },
+        ],
+        lat: 48.8566,
+        lng: 2.3522,
+        country: 'France',
+        dateCreated: '2025-04-20T09:00:00Z',
+        lastUpdated: '2025-04-22T16:00:00Z',
     },
     {
-        id: 'img3', lat: 48.8566, lng: 2.3522, url: 'https://plus.unsplash.com/premium_photo-1661956135713-f93a5a95904d?q=80&w=2084&auto=format&fit=crop&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D', country: 'France', caption:
-            '', description: '', date: "2025-05-18"
+        id: 'album3',
+        title: 'New York City Vibes',
+        albumCover: {
+            id: 'cover_nyc',
+            url: 'https://images.unsplash.com/photo-1496442226696-b4d988801892?q=80&w=800&auto=format&fit=crop', // Placeholder
+            dateAdded: '2025-03-15T12:00:00Z',
+        },
+        images: [], // Album with no internal images yet, just a cover
+        lat: 40.7128,
+        lng: -74.0060,
+        country: 'United States of America',
+        dateCreated: '2025-03-15T10:00:00Z',
+        lastUpdated: '2025-03-15T10:00:00Z',
     },
     {
-        id: 'img4', lat: 40.7128, lng: -74.0060, url: 'https://via.placeholder.com/40x40.png?text=US', country: 'United States of America', caption:
-            '', description: '', date: "2025-05-18"
-    },
-    {
-        id: 'img5', lat: 35.6895, lng: 139.6917, url: 'https://via.placeholder.com/40x40.png?text=JP', country: 'Japan', caption:
-            '', description: '', date: "2025-05-18"
-    },
-    // Add more images from your dictionary
+        id: 'album4',
+        title: 'Tokyo Expedition',
+        albumCover: {
+            id: 'cover_tokyo',
+            url: 'https://images.unsplash.com/photo-1542051841857-5f90071e7989?q=80&w=800&auto=format&fit=crop', // Placeholder
+            dateAdded: '2025-02-10T13:00:00Z',
+        },
+        images: [
+            { id: 'tokyo_img1', url: 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?q=80&w=800&auto=format&fit=crop', dateAdded: '2025-02-10T13:05:00Z' },
+            { id: 'tokyo_img2', url: 'https://images.unsplash.com/photo-1536098561742-ca998e48cbcc?q=80&w=800&auto=format&fit=crop', dateAdded: '2025-02-10T13:10:00Z' },
+            { id: 'tokyo_img3', url: 'https://images.unsplash.com/photo-1513407030348-c983a97b98d8?q=80&w=800&auto=format&fit=crop', dateAdded: '2025-02-10T13:15:00Z' },
+        ],
+        lat: 35.6895,
+        lng: 139.6917,
+        country: 'Japan',
+        dateCreated: '2025-02-10T12:00:00Z',
+        lastUpdated: '2025-02-11T18:20:00Z',
+    }
 ];
 
 export default function GalleryPage() {
-    return (<>
-        {/* <Navbar /> */}
-        <MapGallery imagesData={myImages} />
-    </>)
+    return (
+        <>
+            {/* <Navbar />  // Assuming Navbar is another component */}
+            <MapGallery imagesData={sampleAlbums} /> {/* Pass the new sample data */}
+        </>
+    );
 }

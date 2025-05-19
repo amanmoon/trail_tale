@@ -19,6 +19,7 @@ const caveat = Caveat({
   variable: '--font-caveat' // Optional: Define a CSS variable
 });
 
+
 export const metadata: Metadata = {
   title: "Trail Tale",
   description: "Explore your travel photo stories on an interactive map. Browse, filter, and search your captured moments, bringing your journey trails to life.",
