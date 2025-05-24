@@ -9,7 +9,7 @@ Welcome to the Interactive Photo Gallery Map! This project is a web application 
 ## Features
 
 * **Interactive World Map:**
-    * Powered by Leaflet.js with custom map tiles (Stadia Maps Outdoors).
+    * Powered by Leaflet.js with custom map tiles.
     * Smooth zooming and panning with defined boundaries.
     * Highlights countries on mouseover and zooms/flies to a country on click.
     * Country-specific zoom adjustments for better viewing of large/small nations.
