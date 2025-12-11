@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { FaEdit, FaTrash, FaArrowLeft, FaPlus } from 'react-icons/fa';
+import { FaEdit, FaTrash, FaArrowLeft, FaPlus, FaImage } from 'react-icons/fa';
 import { ImageInfo, ImageItem, ImageEditPanelProps } from '@/interfaces/interface';
 import './ImageEditPanel.css';
 
@@ -20,37 +20,30 @@ const MAX_PREVIEW_IMAGES_IN_DETAILS = 3;
 type PanelView = 'displayDetails' | 'editDetails' | 'manageImages';
 
 export function ImageEditPanel({
-    imageInfo, // This is the album object from GalleryPage's state
-    onSave,    // Prop function from GalleryPage to save the updated album
-    onClose,   // Prop function from GalleryPage to close the panel
+    imageInfo, 
+    onSave,    
+    onClose,   
     isOpen,
     onStartPickLocation,
     onDelete,
 }: ImageEditPanelProps) {
     const [panelView, setPanelView] = useState<PanelView>('displayDetails');
 
-    // Form states for album metadata
     const [albumTitle, setAlbumTitle] = useState('');
     const [albumDescription, setAlbumDescription] = useState('');
     const [albumCoverKey, setAlbumCoverKey] = useState('');
     const [albumDate, setAlbumDate] = useState('');
-
-    // State for a newly selected cover file (not yet saved)
     const [selectedCoverFile, setSelectedCoverFile] = useState<File | null>(null);
     const [coverFilePreview, setCoverFilePreview] = useState<string | null>(null);
 
-    // States for displayable image sources (Base64 from LS or Blob URL for previews)
     const [displayModeCoverSrc, setDisplayModeCoverSrc] = useState<string | null>(null);
     const [editModePreviewSrc, setEditModePreviewSrc] = useState<string | null>(null);
 
-    // THIS IS THE CRITICAL STATE for internal images during an edit session
     const [editableAlbumImages, setEditableAlbumImages] = useState<ImageItem[]>([]);
-    // This map stores displayable srcs for images in editableAlbumImages or imageInfo.images
     const [internalImagesDisplaySrcMap, setInternalImagesDisplaySrcMap] = useState<Record<string, string | null>>({});
     const [selectedImageIds, setSelectedImageIds] = useState<Set<string>>(new Set());
 
     const currentlyViewedAlbumIdRef = useRef<string | null>(null);
-    // ... (other refs and showDeleteConfirm state)
     const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
     const coverFileInputRef = useRef<HTMLInputElement>(null);
     const internalImageUploadRef = useRef<HTMLInputElement>(null);
@@ -61,10 +54,9 @@ export function ImageEditPanel({
         setPanelView(newView);
     };
 
-    // Main effect to synchronize panel state with imageInfo prop
     useEffect(() => {
         if (isOpen) {
-            const currentAlbumProp = imageInfo; // The album passed from GalleryPage
+            const currentAlbumProp = imageInfo; 
             if (currentAlbumProp) {
                 if (currentlyViewedAlbumIdRef.current !== currentAlbumProp.id) {
                     console.log("ImageEditPanel: Initializing for new/different album:", currentAlbumProp.id);
@@ -74,9 +66,9 @@ export function ImageEditPanel({
                     setAlbumCoverKey(coverKeyFromProp);
                     setAlbumDate(currentAlbumProp.dateCreated || (currentAlbumProp.id === "NEW_IMAGE_TEMP_ID" ? new Date().toISOString().split('T')[0] : ''));
 
-                    setSelectedCoverFile(null); // No new file selected initially
+                    setSelectedCoverFile(null); 
                     setEditableAlbumImages(currentAlbumProp.images ? [...currentAlbumProp.images] : []);
-                    setSelectedImageIds(new Set()); // Clear any previous selections
+                    setSelectedImageIds(new Set()); 
 
                     if (coverKeyFromProp) {
                         const base64Data = localStorage.getItem(coverKeyFromProp);
@@ -88,21 +80,20 @@ export function ImageEditPanel({
                     }
 
                     if (currentAlbumProp.id === "NEW_IMAGE_TEMP_ID") {
-                        setPanelView('editDetails'); // Start new albums in edit mode
+                        setPanelView('editDetails'); 
                     } else {
-                        setPanelView('displayDetails'); // Start existing albums in display mode
+                        setPanelView('displayDetails'); 
                     }
-                    currentlyViewedAlbumIdRef.current = currentAlbumProp.id; // Track this album
+                    currentlyViewedAlbumIdRef.current = currentAlbumProp.id; 
                 }
             }
-        } else { // Panel is closing
+        } else { 
             setPanelView('displayDetails');
-            // Clear all form and temporary states
             setAlbumTitle(''); setAlbumDescription(''); setAlbumCoverKey(''); setAlbumDate('');
             setSelectedCoverFile(null); setCoverFilePreview(null);
             setDisplayModeCoverSrc(null); setEditModePreviewSrc(null);
             setEditableAlbumImages([]); setInternalImagesDisplaySrcMap({}); setSelectedImageIds(new Set());
-            currentlyViewedAlbumIdRef.current = null; // Reset tracked album
+            currentlyViewedAlbumIdRef.current = null; 
             if (coverFileInputRef.current) coverFileInputRef.current.value = "";
             if (internalImageUploadRef.current) internalImageUploadRef.current.value = "";
         }
@@ -116,14 +107,14 @@ export function ImageEditPanel({
         }
     }, [isOpen]);
 
-    useEffect(() => { /* Effect for selectedCoverFile preview */
+    useEffect(() => { 
         if (selectedCoverFile) {
             const objectUrl = URL.createObjectURL(selectedCoverFile);
             setCoverFilePreview(objectUrl);
             setEditModePreviewSrc(objectUrl);
             return () => URL.revokeObjectURL(objectUrl);
         } else {
-            if (albumCoverKey) { // albumCoverKey is from the saved imageInfo.albumCover.url
+            if (albumCoverKey) { 
                 setEditModePreviewSrc(localStorage.getItem(albumCoverKey) || null);
             } else {
                 setEditModePreviewSrc(null);
@@ -132,16 +123,15 @@ export function ImageEditPanel({
         }
     }, [selectedCoverFile, albumCoverKey]);
 
-    // Effect to load/update display sources for internal images (used by all views showing the list)
     useEffect(() => {
-        if (isOpen && imageInfo) { // imageInfo must be valid
+        if (isOpen && imageInfo) { 
             const imageListToFetch = (panelView === 'manageImages')
-                ? editableAlbumImages // In manage mode, show sources for the editable list
-                : imageInfo.images || []; // In display/edit mode (for preview), show from prop
+                ? editableAlbumImages 
+                : imageInfo.images || []; 
 
             const sources: Record<string, string | null> = {};
             imageListToFetch.forEach(imgItem => {
-                if (imgItem.url) { // url is LS key
+                if (imgItem.url) { 
                     sources[imgItem.id] = localStorage.getItem(imgItem.url) || null;
                 } else {
                     sources[imgItem.id] = null;
@@ -149,7 +139,7 @@ export function ImageEditPanel({
             });
             setInternalImagesDisplaySrcMap(sources);
         }
-    }, [isOpen, panelView, imageInfo, editableAlbumImages]); // Rerun if these change
+    }, [isOpen, panelView, imageInfo, editableAlbumImages]); 
 
 
     const switchToEditDetails = () => {
@@ -175,9 +165,9 @@ export function ImageEditPanel({
             setDisplayModeCoverSrc(currentCoverKey ? localStorage.getItem(currentCoverKey) || null : null);
             setAlbumDate(imageInfo.dateCreated || '');
             setSelectedCoverFile(null);
-            setEditableAlbumImages(imageInfo.images ? [...imageInfo.images] : []); // Reset internal images
+            setEditableAlbumImages(imageInfo.images ? [...imageInfo.images] : []); 
         } else {
-            onClose(); // If it was a "new album" form
+            onClose(); 
         }
     };
 
@@ -192,26 +182,25 @@ export function ImageEditPanel({
         setEditableAlbumImages(prev => [...prev, ...resolvedNewImageItems]);
         if (internalImageUploadRef.current) internalImageUploadRef.current.value = "";
         const updatedAlbumDetails: ImageInfo = {
-            ...imageInfo, // Spreads existing fields like id, lat, lng, country
+            ...imageInfo, 
             title: albumTitle,
             description: albumDescription,
             albumCover: imageInfo.albumCover,
-            images: resolvedNewImageItems, // Use the filtered list of images
+            images: resolvedNewImageItems, 
             dateCreated: imageInfo.id === "NEW_IMAGE_TEMP_ID"
                 ? (albumDate || new Date().toISOString().split('T')[0])
                 : imageInfo.dateCreated,
             lastUpdated: new Date().toISOString(),
         };
 
-        onSave(updatedAlbumDetails); // Send to GalleryPage
-
+        onSave(updatedAlbumDetails); 
     };
 
-    const handleToggleImageSelection = (imageId: string) => { /* ... (same) ... */
+    const handleToggleImageSelection = (imageId: string) => { 
         setSelectedImageIds(prevSelected => { const newSelected = new Set(prevSelected); if (newSelected.has(imageId)) { newSelected.delete(imageId); } else { newSelected.add(imageId); } return newSelected; });
     };
 
-    const handleDeleteSelectedImages = () => { /* ... (same - updates editableAlbumImages and LS) ... */
+    const handleDeleteSelectedImages = () => { 
         if (selectedImageIds.size === 0) return;
         if (!confirm(`Are you sure you want to delete ${selectedImageIds.size} selected image(s)? This action is permanent.`)) return;
         const imagesToKeep: ImageItem[] = []; const urlsToDeleteFromStorage: string[] = [];
@@ -221,25 +210,24 @@ export function ImageEditPanel({
         setEditableAlbumImages(imagesToKeep); setSelectedImageIds(new Set());
 
         const updatedAlbumDetails: ImageInfo = {
-            ...imageInfo, // Spreads existing fields like id, lat, lng, country
+            ...imageInfo, 
             title: albumTitle,
             description: albumDescription,
             albumCover: imageInfo.albumCover,
-            images: imagesToKeep, // Use the filtered list of images
+            images: imagesToKeep, 
             dateCreated: imageInfo.id === "NEW_IMAGE_TEMP_ID"
                 ? (albumDate || new Date().toISOString().split('T')[0])
                 : imageInfo.dateCreated,
             lastUpdated: new Date().toISOString(),
         };
 
-        onSave(updatedAlbumDetails); // Send to GalleryPage
+        onSave(updatedAlbumDetails); 
     };
 
     const handleSubmitAlbumDetails = async (e: React.FormEvent) => {
         e.preventDefault();
         if (!imageInfo) return;
         let finalAlbumCoverItem: ImageItem;
-        // Logic for handling new cover file or existing cover key
         if (selectedCoverFile) {
             try {
                 const base64ImageData = await convertFileToBase64(selectedCoverFile);
@@ -247,7 +235,6 @@ export function ImageEditPanel({
                 const newCoverStorageKey = `img_data_cover_${newCoverId}_${selectedCoverFile.name.split('.')[0]}`;
                 localStorage.setItem(newCoverStorageKey, base64ImageData);
                 finalAlbumCoverItem = { id: newCoverId, url: newCoverStorageKey, dateAdded: new Date().toISOString() };
-                // Clean up old cover if it changed and existed AND the key is different
                 if (imageInfo.albumCover?.url && imageInfo.albumCover.url !== newCoverStorageKey && imageInfo.albumCover.url !== albumCoverKey) {
                     localStorage.removeItem(imageInfo.albumCover.url);
                 }
@@ -257,12 +244,12 @@ export function ImageEditPanel({
                 finalAlbumCoverItem = { id: generatePanelUniqueId("imgItem_cover_manual_key"), url: albumCoverKey, dateAdded: new Date().toISOString() };
                 if (imageInfo.albumCover.url) localStorage.removeItem(imageInfo.albumCover.url);
             } else {
-                finalAlbumCoverItem = imageInfo.albumCover; // Key hasn't changed from original
+                finalAlbumCoverItem = imageInfo.albumCover; 
             }
-        } else if (albumCoverKey) { // New album, no imageInfo.albumCover, but a key was typed
+        } else if (albumCoverKey) { 
             finalAlbumCoverItem = { id: generatePanelUniqueId("imgItem_cover_new_key"), url: albumCoverKey, dateAdded: new Date().toISOString() };
         }
-        else { // No new file and no existing/typed valid cover key
+        else { 
             alert("Album cover image is required."); return;
         }
 
@@ -271,12 +258,12 @@ export function ImageEditPanel({
             title: albumTitle,
             description: albumDescription,
             albumCover: finalAlbumCoverItem,
-            images: [...editableAlbumImages], // Pass a new array reference of the current state
+            images: [...editableAlbumImages], 
             dateCreated: imageInfo.id === "NEW_IMAGE_TEMP_ID" ? (albumDate || new Date().toISOString().split('T')[0]) : imageInfo.dateCreated,
             lastUpdated: new Date().toISOString(),
         };
 
-        onSave(updatedAlbumDetails); // Send to GalleryPage
+        onSave(updatedAlbumDetails); 
 
         setSelectedCoverFile(null);
         if (coverFileInputRef.current) coverFileInputRef.current.value = "";
@@ -285,16 +272,26 @@ export function ImageEditPanel({
         }
     };
 
-    const handlePickLocationFromMapClick = () => { /* ... (same) ... */
-        onStartPickLocation({ title: albumTitle, description: albumDescription, albumCoverUrl: albumCoverKey, albumDate: albumDate, });
+    const handlePickLocationFromMapClick = async () => {
+        let currentCoverKeyRef = albumCoverKey;
+        if (selectedCoverFile) {
+            try {
+                const base64ImageData = await convertFileToBase64(selectedCoverFile);
+                currentCoverKeyRef = generatePanelUniqueId("imgItem_cover_temp");
+                localStorage.setItem(currentCoverKeyRef, base64ImageData);
+                setAlbumCoverKey(currentCoverKeyRef);
+            } catch (error) {
+                console.error("Error processing cover for map pick:", error);
+            }
+        }
+        onStartPickLocation({ title: albumTitle, description: albumDescription, albumCoverUrl: currentCoverKeyRef, albumDate: albumDate });
     };
     const handleDeleteInitiate = () => setShowDeleteConfirm(true);
-    const handleConfirmDelete = () => { /* ... (same - GalleryPage handles actual LS deletion) ... */
+    const handleConfirmDelete = () => { 
         if (imageInfo) { onDelete(imageInfo.id); setShowDeleteConfirm(false); onClose(); }
     };
     const handleCancelDelete = () => setShowDeleteConfirm(false);
 
-    // --- Display values (remain mostly same) ---
     const displayTitle = imageInfo?.title || (imageInfo?.id === "NEW_IMAGE_TEMP_ID" ? "New Album" : "Untitled Album");
     const displayDesc = imageInfo?.description || '';
     const displayDateCreated = imageInfo?.dateCreated ? new Date(imageInfo.dateCreated).toLocaleDateString() : 'N/A';
@@ -302,7 +299,6 @@ export function ImageEditPanel({
     const currentLatDisplay = (imageInfo?.lat === 0 && imageInfo?.lng === 0 && imageInfo.id === "NEW_IMAGE_TEMP_ID") ? "Pick Location" : imageInfo?.lat?.toFixed(4) || "N/A";
     const currentLngDisplay = (imageInfo?.lat === 0 && imageInfo?.lng === 0 && imageInfo.id === "NEW_IMAGE_TEMP_ID") ? "" : imageInfo?.lng?.toFixed(4) || "N/A";
 
-    // --- JSX (remains structurally same as your last provided code) ---
     return (
         <div className={`slide-panel-overlay ${isOpen ? 'open' : ''}`} onClick={onClose}>
             <div className={`slide-panel ${isOpen ? 'open' : ''}`} onClick={(e) => e.stopPropagation()}>
@@ -313,7 +309,16 @@ export function ImageEditPanel({
                     {panelView === 'displayDetails' && imageInfo && imageInfo.id !== "NEW_IMAGE_TEMP_ID" && (
                         <div className="panel-display-mode">
                             {/* Cover, Title, Desc, Dates, Location */}
-                            <div className="image-container"> <img src={displayModeCoverSrc || PLACEHOLDER_IMAGE_URL} alt={displayTitle} className="panel-image-large" onError={(e) => { if ((e.currentTarget as HTMLImageElement).src !== PLACEHOLDER_IMAGE_URL) (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE_URL; }} /> </div>
+                            <div className="image-container">
+                                {displayModeCoverSrc ? (
+                                    <img src={displayModeCoverSrc} alt={displayTitle} className="panel-image-large" />
+                                ) : (
+                                    <div className="panel-image-large empty-cover-preview">
+                                        <FaImage className="empty-cover-icon" />
+                                        <span>No Cover Image</span>
+                                    </div>
+                                )}
+                            </div>
                             <h1>{displayTitle}</h1> {displayDesc && <p className="description-text">{displayDesc}</p>}
                             <div className="details-group"> <p><strong>Date Created:</strong> {displayDateCreated}</p> <p><strong>Last Updated:</strong> {displayDateLastUpdated}</p> {imageInfo.country && <p><strong>Country:</strong> {imageInfo.country}</p>} </div>
 
@@ -334,10 +339,28 @@ export function ImageEditPanel({
                     {/* EDIT ALBUM DETAILS VIEW */}
                     {panelView === 'editDetails' && imageInfo && (
                         <div className="panel-edit-mode">
-                            <div className="form-group form-image-preview-container"> <img src={editModePreviewSrc || PLACEHOLDER_IMAGE_URL} alt="Album Cover Preview" className="form-image-preview" onError={(e) => { if ((e.currentTarget as HTMLImageElement).src !== PLACEHOLDER_IMAGE_URL) (e.currentTarget as HTMLImageElement).src = PLACEHOLDER_IMAGE_URL; }} /> </div>
+                            <div className="form-group form-image-preview-container">
+                                {editModePreviewSrc ? (
+                                    <img src={editModePreviewSrc} alt="Album Cover Preview" className="form-image-preview" />
+                                ) : (
+                                    <div className="form-image-preview empty-cover-preview">
+                                        <FaImage className="empty-cover-icon" />
+                                        <span>No Cover Image Preview</span>
+                                    </div>
+                                )}
+                            </div>
                             <h4>{imageInfo.id === "NEW_IMAGE_TEMP_ID" ? "Create New Album" : "Edit Album Details"}</h4>
                             <form onSubmit={handleSubmitAlbumDetails}>
-                                <div className="form-group"> <label htmlFor="albumCoverFile">Album Cover Image:</label> <input type="file" id="albumCoverFile" accept="image/*" onChange={handleCoverFileChange} ref={coverFileInputRef} /> {selectedCoverFile && <small>Selected: {selectedCoverFile.name}</small>} </div>
+                                <div className="form-group">
+                                    <label>Album Cover Image:</label>
+                                    <div>
+                                        <label htmlFor="albumCoverFile" className="custom-file-upload-btn">
+                                            <FaPlus /> Add photo
+                                        </label>
+                                        <input type="file" id="albumCoverFile" accept="image/*" style={{ display: 'none' }} onChange={handleCoverFileChange} ref={coverFileInputRef} />
+                                    </div>
+                                    {selectedCoverFile && <small className="selected-file-name">Selected: {selectedCoverFile.name}</small>}
+                                </div>
                                 <div className="form-group"><label htmlFor="albumTitle">Album Title:</label><input type="text" id="albumTitle" value={albumTitle} onChange={(e) => setAlbumTitle(e.target.value)} maxLength={50} required /></div>
                                 <div className="form-group"><label htmlFor="albumDescription">Album Description:</label><textarea id="albumDescription" value={albumDescription} onChange={(e) => setAlbumDescription(e.target.value)} maxLength={300} rows={3} /></div>
                                 <div className="form-group"><label>Location (Lat, Lon):</label><div className="location-input-group"><div className="coordinates-text"><span>Lat: {currentLatDisplay}</span>{currentLngDisplay && <span style={{ marginLeft: '10px' }}>Lon: {currentLngDisplay}</span>}</div><button type="button" onClick={handlePickLocationFromMapClick} className="pick-location-icon-btn" title="Pick location">📍</button></div></div>
@@ -367,7 +390,6 @@ export function ImageEditPanel({
                                     </button>
                                 </div>) : (
                                 <div className="add-images-custom-button">
-                                    {/* The label now becomes the styled button and contains the "+" icon */}
                                     <label
                                         htmlFor="addInternalImagesInput"
                                         title="Add New Images to Album"
@@ -375,7 +397,6 @@ export function ImageEditPanel({
                                         <FaPlus />
                                     </label>
 
-                                    {/* The actual file input is now hidden via CSS (or inline style) */}
                                     <input
                                         type="file"
                                         id="addInternalImagesInput"
@@ -400,9 +421,8 @@ export function ImageEditPanel({
                             </div>
                         </div>
                     )}
-                </div> {/* End .panel-content */}
+                </div> 
 
-                {/* FABs for Edit/Delete Album - shown only in displayDetails view for an existing album */}
                 {panelView === 'displayDetails' && imageInfo && imageInfo.id !== "NEW_IMAGE_TEMP_ID" && (
                     <>
                         <button type="button" onClick={() => handleDeleteInitiate()} className="delete-trash-button" aria-label="Delete Album" title="Delete Album"> <FaTrash /> </button>
@@ -410,7 +430,7 @@ export function ImageEditPanel({
                     </>
                 )}
 
-                {showDeleteConfirm && ( /* ... (delete confirmation dialog) ... */
+                {showDeleteConfirm && (
                     <div className="confirm-delete-overlay">
                         <div className="confirm-delete-dialog">
                             <p>Delete album "{imageInfo?.title}"? This will also delete its cover and all internal images from storage.</p>
