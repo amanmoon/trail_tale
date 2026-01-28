@@ -3,7 +3,7 @@ import styles from './coreOfferSection.module.css';
 import { BsGeoAltFill, BsImages, BsGlobe2 } from 'react-icons/bs';
 
 interface OfferItemProps {
-  icon: React.ReactNode; 
+  icon: React.ReactNode;
   title: string;
   description: string;
 }
@@ -22,24 +22,25 @@ const offerItemsData: OfferItemProps[] = [
   {
     icon: <BsGeoAltFill />,
     title: "Pin Your Memories",
-    description: "Effortlessly place your photos on an interactive world map, marking every step of your adventure."
+    description: "Effortlessly place your photos on an interactive world map, marking every step of your adventure in seconds."
   },
   {
-    icon: <BsImages />, 
+    icon: <BsImages />,
     title: "Craft Beautiful Albums",
     description: "Organize your pinned memories into thematic albums, adding narratives and context to your visual stories."
   },
   {
     icon: <BsGlobe2 />,
-    title: "Explore & Share",
-    description: "Rediscover your own journeys or share your beautifully mapped albums with friends and family."
+    title: "Explore & Relive",
+    description: "Rediscover your own journeys through an interactive globe — every pin is a portal back to that moment."
   }
 ];
 
 const CoreOfferSection: React.FC = () => {
   return (
-    <section className={styles.coreOffer}>
+    <section className={styles.coreOffer} id="features">
       <div className={styles.contentWrapper}>
+        <span className={styles.eyebrow}>Core Features</span>
         <h2 className={styles.sectionTitle}>
           Bring Your Journeys to Life
         </h2>
@@ -49,7 +50,7 @@ const CoreOfferSection: React.FC = () => {
         <div className={styles.offerGrid}>
           {offerItemsData.map((item) => (
             <OfferItem
-              key={item.title} 
+              key={item.title}
               icon={item.icon}
               title={item.title}
               description={item.description}

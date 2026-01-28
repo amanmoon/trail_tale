@@ -18,23 +18,21 @@
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Ensures the image covers the area, might crop */
-  border: 1px solid #eee; /* Optional: a very light border around the image itself */
+  object-fit: cover; 
+  border: 1px solid #eee; 
 }
 
-/* Style for the "pin" - using a pseudo-element */
-/* Style for the text (country name) - using a pseudo-element */
 .custom-map-image-icon.polaroid-style::after {
-  content: attr(data-country-name); /* Will pull text from a data attribute */
+  content: attr(data-country-name); 
   position: absolute;
-  bottom: 10px; /* Position at the bottom of the padding */
+  bottom: 10px; 
   left: 0;
   right: 0;
   text-align: center;
-  font-family: 'Arial', sans-serif; /* Choose a suitable font */
+  font-family: 'Arial', sans-serif; 
   color: #333;
   font-size: 14px;
-  font-style: italic; /* If you want italic text like in the example */
+  font-style: italic;
 }
 
 .leaflet-marker-icon {
@@ -42,10 +40,9 @@
 }
 
 .custom-map-marker-wrapper {
-    /* background-color: rgba(0, 255, 0, 0.1); /* For debugging iconSize area */
     display: flex;
     justify-content: center;
-    align-items: flex-start; /* Align paper to the top (considering pin space) */
+    align-items: flex-start; 
 }
 
 
@@ -53,7 +50,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    -webkit-backface-visibility: hidden; /* Improve rendering during transforms */
+    -webkit-backface-visibility: hidden; 
     backface-visibility: hidden;
 }
 
@@ -66,19 +63,19 @@
 }
 
 .map-marker-polaroid-card {
-    background-color: #fefefe; /* Slightly off-white for aged paper */
+    background-color: #fefefe; 
     border: 1px solid #cacaca;
-    box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3), -1px -1px 3px rgba(255,255,255,0.5); /* More distinct shadow */
+    box-shadow: 3px 3px 7px rgba(0, 0, 0, 0.3), -1px -1px 3px rgba(255,255,255,0.5); 
     position: relative;
     display: flex;
     flex-direction: column;
     box-sizing: border-box;
-    transform: rotate(-3.5deg); /* Default tilt */
-    transition: transform 0.1s ease-out; /* Smooth transform on hover */
+    transform: rotate(-3.5deg); 
+    transition: transform 0.1s ease-out; 
 }
 
 .leaflet-polaroid-marker-wrapper:hover .map-marker-polaroid-card {
-    transform: rotate(-1deg) scale(1.05); /* Slight un-tilt and scale up on hover */
+    transform: rotate(-1deg) scale(1.05); 
     box-shadow: 5px 5px 15px rgba(0, 0, 0, 0.35);
 }
 
@@ -102,7 +99,6 @@
 }
 
 .map-marker-polaroid-caption {
-    /* height, margin-top are set by inline styles */
     width: 100%;
     display: flex;
     justify-content: center;
@@ -110,8 +106,8 @@
     text-align: center;
     overflow: hidden;
     box-sizing: border-box;
-    padding: 1px 0; /* Minimal vertical padding */
-    background-color: transparent; /* Caption is on the same paper */
+    padding: 1px 0; 
+    background-color: transparent; 
 }
 
 .map-marker-caption-text {
@@ -131,24 +127,21 @@
     top: 15px;
     left: 15px;
     z-index: 1001;
-    display: flex; /* Align back button and search pill */
+    display: flex; 
     align-items: center;
-    gap: 8px; /* Space between back button and search pill */
-    font-family: 'Roboto', Arial, sans-serif; /* Google Maps uses Roboto */
+    gap: 8px; 
 }
 
-/* Pill-shaped wrapper for the input field and search icon */
 .search-input-wrapper-gm {
     display: flex;
     align-items: center;
     background-color: #fff;
-    border-radius: 24px; /* This creates the pill shape */
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); /* Google Maps like shadow */
-    height: 48px; /* Typical height for Google Maps search bar */
-    padding-left: 16px; /* Padding for text inside input */
-    /* padding-right: is handled by the button's padding */
-    flex-grow: 1; /* Allows the search bar to take available width if container is wider */
-    min-width: 280px; /* Or your desired min width */
+    border-radius: 24px; 
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15); 
+    height: 48px; 
+    padding-left: 16px; 
+    flex-grow: 1; 
+    min-width: 280px; 
     max-width: 400px;
 }
 
@@ -173,12 +166,12 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #5f6368; /* Google's icon color */
-    padding: 0 12px; /* Padding for the icon button */
-    height: 100%; /* Match wrapper height */
+    color: #5f6368; 
+    padding: 0 12px; 
+    height: 100%; 
 }
 .search-action-button-gm:hover {
-    background-color: rgba(0,0,0,0.05); /* Subtle hover */
+    background-color: rgba(0,0,0,0.05); 
 }
 
 
@@ -189,11 +182,10 @@
     border-bottom-right-radius: 24px;
 }
 
-/* Back button styling (distinct from the pill) */
 .search-back-button-gm {
     background-color: #fff;
     border: none;
-    border-radius: 50%; /* Circular button */
+    border-radius: 50%; 
     width: 40px;
     height: 40px;
     display: flex;
@@ -202,7 +194,7 @@
     box-shadow: 0 1px 4px rgba(0,0,0,0.15);
     cursor: pointer;
     color: #5f6368;
-    font-size: 20px; /* For arrow emoji or icon */
+    font-size: 20px; 
     transition: background-color 0.2s ease;
 }
 
@@ -210,31 +202,29 @@
     background-color: #f1f3f4;
 }
 
-/* Suggestions Dropdown Styling */
 .search-results-dropdown-gm {
-    position: absolute; /* Position relative to country-search-container */
-    top: calc(100% + 6px); /* Below the search bar group */
+    position: absolute; 
+    top: calc(100% + 6px); 
     left: 0; 
-    width: calc(100% - 48px); /* Match width of search input wrapper if back button is there */
+    width: calc(100% - 48px); 
     background-color: #fff;
-    border-radius: 8px; /* Softer radius for dropdown */
+    border-radius: 8px; 
     box-shadow: 0 4px 12px rgba(0,0,0,0.1);
     list-style: none;
-    padding: 8px 0; /* Padding inside dropdown */
+    padding: 8px 0; 
     margin: 0;
     max-height: 280px;
     overflow-y: auto;
-    z-index: 1000; /* Below search bar but above map */
+    z-index: 1000; 
 }
 
 .country-search-container.google-maps-style .search-results-dropdown-gm {
-    left: calc(40px + 8px); /* Width of back button + gap */
-    width: auto; /* Let content define width, or set explicitly to match pill */
-    min-width: var(--search-pill-width, 280px); /* Match pill's min-width */
+    left: calc(40px + 8px); 
+    min-width: var(--search-pill-width, 280px); 
 }
 
 .search-result-item-gm {
-    padding: 10px 20px; /* More padding for items */
+    padding: 10px 20px; 
     cursor: pointer;
     font-size: 15px;
     color: #3c4043;
@@ -242,28 +232,25 @@
 
 .search-result-item-gm:hover,
 .search-result-item-gm:focus {
-    background-color: #f1f3f4; /* Google-like hover */
+    background-color: #f1f3f4; 
     outline: none;
 }
 
-/* If using react-icons */
 .search-action-button-gm svg {
-    font-size: 20px; /* Adjust as needed */
+    font-size: 20px; 
 }
 .search-back-button-gm svg {
     font-size: 18px;
 }
 
 .map-actions-overlay {
-  position: absolute; /* Positioned relative to its nearest positioned ancestor (e.g., the map container or a page wrapper) */
-  top: 20px;          /* Distance from the top. Adjust if you have a search bar or other elements above it. */
-                     /* For example, if your search bar is 60px tall and also at the top, you might use top: 80px; */
-  right: 20px;         /* Distance from the right */
-  z-index: 1050;       /* Ensures it's above map elements and potentially other simple overlays. */
-                     /* Panels/Modals should have a higher z-index (e.g., 2000+). */
-  display: flex;       /* Enables easy alignment if more buttons are added here later */
-  flex-direction: column; /* Stack multiple buttons vertically if needed */
-  gap: 10px;           /* Space between multiple buttons if any */
+  position: absolute; 
+  top: 20px;          
+  right: 20px;         
+  z-index: 1050;       
+  display: flex;       
+  flex-direction: column; 
+  gap: 10px;           
 }
 
 .map-overlay-button {
@@ -298,9 +285,9 @@
 }
 
 .add-new-image-button:disabled {
-  background-color: #f1f3f4; /* Greyed out background for disabled state */
-  color: #bdc1c6;          /* Lighter icon color when disabled */
-  box-shadow: none;         /* No shadow when disabled, appears flat */
+  background-color: #f1f3f4; 
+  color: #bdc1c6;          
+  box-shadow: none;         
   cursor: not-allowed;
-  transform: none;          /* No press effect when disabled */
+  transform: none;          
 }

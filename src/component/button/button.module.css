@@ -1,50 +1,59 @@
 .button {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
   padding: 10px 20px;
-  border-radius: 6px;
-  font-weight: 500;
+  border-radius: 8px;
+  font-weight: 600;
   text-align: center;
   cursor: pointer;
-  transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out, border-color 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+  transition: background-color 0.2s ease, color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease, transform 0.15s ease;
   border: 1px solid transparent;
   font-family: var(--font-inter), sans-serif;
   text-decoration: none;
+  letter-spacing: -0.01em;
 }
 
 .primary {
   background-color: #1a73e8;
   color: #ffffff;
-  box-shadow: 0 1px 2px 0 rgba(26,115,232,.45), 0 1px 3px 1px rgba(26,115,232,.3);
+  box-shadow: 0 2px 6px rgba(26, 115, 232, 0.4);
 }
 .primary:hover {
-  background-color: #1765cc;
-  box-shadow: 0 1px 3px 0 rgba(26,115,232,.45), 0 2px 6px 2px rgba(26,115,232,.3);
+  background-color: #1558b0;
+  box-shadow: 0 4px 12px rgba(26, 115, 232, 0.5);
+  transform: translateY(-1px);
+  color: #ffffff;
+  text-decoration: none;
 }
 
 .secondary {
-  background-color: #e9ecef;
-  color: #202124;
-  border: 1px solid #dadce0;
+  background-color: #f1f5f9;
+  color: #374151;
+  border: 1px solid #e2e8f0;
 }
 .secondary:hover {
-  background-color: #dadce0;
+  background-color: #e8edf3;
+  border-color: #cbd5e0;
+  text-decoration: none;
 }
 
 .outline {
   background-color: transparent;
   color: #1a73e8;
-  border: 1px solid #1a73e8;
+  border: 1.5px solid #1a73e8;
 }
 .outline:hover {
-  background-color: rgba(26, 115, 232, 0.05); 
+  background-color: rgba(26, 115, 232, 0.06);
+  text-decoration: none;
 }
 
 .medium {
-  font-size: 0.95rem;
+  font-size: 0.92rem;
   padding: 10px 20px;
 }
 
 .large {
-  font-size: 1.1rem;
-  padding: 12px 28px;
+  font-size: 1rem;
+  padding: 13px 28px;
 }

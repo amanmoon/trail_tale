@@ -73,13 +73,12 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
     const searchContainerRef = useRef<HTMLDivElement>(null);
 
     const [isNewAlbumPanelOpen, setIsNewAlbumPanelOpen] = useState<boolean>(false);
-    const [newAlbumDraft, setNewAlbumDraft] = useState<ImageInfo | null>(null); // This is an ImageInfo (album) object
+    const [newAlbumDraft, setNewAlbumDraft] = useState<ImageInfo | null>(null); 
 
     useEffect(() => {
         pickingLocationForAlbumIdRef.current = pickingLocationForAlbumId;
     }, [pickingLocationForAlbumId]);
 
-    // Called when an album marker on the map is clicked
     const handleAlbumMarkerClick = useCallback((album: ImageInfo) => {
         if (pickingLocationForAlbumIdRef.current) return;
         setNewAlbumDraft(null);
@@ -94,7 +93,6 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
         setEditingAlbum(null);
     }, []);
 
-    // Called when an existing album's details are saved from the panel
     const handleEditPanelSave = useCallback((updatedAlbum: ImageInfo) => {
         setAlbumsData(prevAlbums =>
             prevAlbums.map(album => (album.id === updatedAlbum.id ? updatedAlbum : album))
@@ -103,9 +101,8 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
         setEditingAlbum(null);
     }, []);
 
-    // Handlers for New Album Workflow 
     const openNewAlbumPanel = () => {
-        setEditingAlbum(null); // Close regular edit panel if open
+        setEditingAlbum(null); 
         setIsEditPanelOpen(false);
 
         const defaultCover: ImageItem = {
@@ -122,7 +119,7 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
             lat: 0,
             lng: 0,
             country: "",
-            dateCreated: new Date().toISOString().split('T')[0], // Default to today
+            dateCreated: new Date().toISOString().split('T')[0], 
             lastUpdated: new Date().toISOString(),
         });
         setIsNewAlbumPanelOpen(true);
@@ -143,16 +140,16 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
     const handleSaveNewAlbum = (albumToSave: ImageInfo) => {
         if (!albumToSave.albumCover.url) {
             alert("Please provide an Album Cover Image Key or upload a cover image for the new album.");
-            return; // Keep panel open
+            return; 
         }
         if (albumToSave.lat === 0 && albumToSave.lng === 0 && albumToSave.id === "NEW_IMAGE_TEMP_ID") {
             alert("Please pick a location on the map for the new album.");
-            return; // Keep panel open
+            return; 
         }
 
         const newAlbumWithPermanentId: ImageInfo = {
             ...albumToSave,
-            id: generatePageUniqueId("album"), // Generate a real unique ID for the album
+            id: generatePageUniqueId("album"), 
             dateCreated: albumToSave.dateCreated || new Date().toISOString(),
             lastUpdated: new Date().toISOString(),
         };
@@ -161,11 +158,10 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
     };
 
     const startPickLocationForNewAlbum = useCallback((currentFormData: CurrentPanelFormData) => {
-        setIsNewAlbumPanelOpen(false); // Keep the new album panel technically "open" but hidden by map interaction
+        setIsNewAlbumPanelOpen(false); 
         if (newAlbumDraft) {
             setNewAlbumDraft(prevDraft => {
                 if (!prevDraft) return null;
-                // Update draft with current form values before hiding panel for map picking
                 const updatedCover = (currentFormData.albumCoverUrl && currentFormData.albumCoverUrl !== prevDraft.albumCover.url)
                     ? { id: prevDraft.albumCover.id || generatePageUniqueId("imgItem_cover_pick"), url: currentFormData.albumCoverUrl, dateAdded: new Date().toISOString() }
                     : prevDraft.albumCover;
@@ -175,7 +171,7 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
                     title: currentFormData.title,
                     description: currentFormData.description,
                     albumCover: updatedCover,
-                    dateCreated: currentFormData.albumDate || prevDraft.dateCreated, // Assuming albumDate is dateCreated
+                    dateCreated: currentFormData.albumDate || prevDraft.dateCreated, 
                 };
             });
             setPickingLocationForAlbumId("NEW_IMAGE_TEMP_ID");
@@ -250,7 +246,6 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
         mapClickLogicHandlerRef.current = mapClickLogicHandler;
     }, [mapClickLogicHandler]);
 
-    // Update markers when albumsData changes or when map becomes ready
     const updateAlbumMarkersCallback = useCallback(() => {
         const L = LRef.current;
         const map = mapRef.current;
@@ -264,7 +259,6 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
     }, [updateAlbumMarkersCallback]);
 
 
-    // Effect for initializing map
     useEffect(() => {
         let L_instance: typeof LType | null = null;
         let mapInstance: Map | null = null;
@@ -388,7 +382,6 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
     }, []);
 
 
-    // Effect for updating markers on map events
     useEffect(() => {
         const map = mapRef.current;
         if (isMapReady && map) {
@@ -400,19 +393,16 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
         }
     }, [isMapReady, debouncedUpdateAlbumMarkers]);
 
-    // Effect for initial marker update and when albumsData changes
     useEffect(() => {
         if (isMapReady && mapRef.current && LRef.current && imageMarkersLayerRef.current) {
             updateAlbumMarkersCallback();
         }
-    }, [isMapReady, albumsData, updateAlbumMarkersCallback]); // updateAlbumMarkersCallback depends on albumsData
+    }, [isMapReady, albumsData, updateAlbumMarkersCallback]); 
 
-    // Effect to update local albumsData state if initial prop changes
     useEffect(() => {
         setAlbumsData(initialAlbumsData);
     }, [initialAlbumsData]);
 
-    // Handler for deleting an album (passed to ImageEditPanel)
     const handleDeleteAlbum = useCallback((albumIdToDelete: string) => {
         setAlbumsData(currentAlbums =>
             currentAlbums.filter(album => album.id !== albumIdToDelete)
@@ -559,12 +549,12 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
 
             {isEditPanelOpen && editingAlbum && (
                 <ImageEditPanel
-                    imageInfo={editingAlbum} // editingAlbum is an ImageInfo (album)
+                    imageInfo={editingAlbum} 
                     onSave={handleEditPanelSave}
                     onClose={handleEditPanelClose}
                     isOpen={isEditPanelOpen}
                     onStartPickLocation={startPickLocationForExistingAlbum}
-                    onDelete={handleDeleteAlbum} // Changed from handleDeleteImage
+                    onDelete={handleDeleteAlbum} 
                 />
             )}
         </>

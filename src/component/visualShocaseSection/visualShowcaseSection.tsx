@@ -14,32 +14,26 @@ const showcasePins = [
 const VisualShowcaseSection: React.FC = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [currentScale, setCurrentScale] = useState(1);
   const animationFrameId = useRef<number | null>(null);
   const isIntersectingRef = useRef(false);
 
   const [pinsShouldAnimate, setPinsShouldAnimate] = useState(false);
 
   const minScale = 1.0;
-  const maxScale = 1.15;
+  const maxScale = 1.08;
 
   useEffect(() => {
     const sectionNode = sectionRef.current;
 
     const handleScroll = () => {
-      if (!isIntersectingRef.current || !sectionNode || !mapContainerRef.current) {
-        return;
-      }
+      if (!isIntersectingRef.current || !sectionNode || !mapContainerRef.current) return;
       const { top, height } = sectionNode.getBoundingClientRect();
       const viewportHeight = window.innerHeight;
       let progress = (viewportHeight - top) / (viewportHeight + height);
       progress = Math.max(0, Math.min(1, progress));
       const newScale = minScale + progress * (maxScale - minScale);
-      setCurrentScale(newScale); 
 
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-      }
+      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
       animationFrameId.current = requestAnimationFrame(() => {
         if (mapContainerRef.current) {
           mapContainerRef.current.style.transform = `scale(${newScale})`;
@@ -51,40 +45,30 @@ const VisualShowcaseSection: React.FC = () => {
       ([entry]) => {
         isIntersectingRef.current = entry.isIntersecting;
         if (entry.isIntersecting) {
-          setPinsShouldAnimate(true); 
+          setPinsShouldAnimate(true);
           window.addEventListener('scroll', handleScroll, { passive: true });
           handleScroll();
         } else {
           window.removeEventListener('scroll', handleScroll);
-          if (animationFrameId.current) {
-            cancelAnimationFrame(animationFrameId.current);
-          }
+          if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
         }
       },
-      {
-        rootMargin: '0px 0px -180px 0px', 
-        threshold: 0.2,
-      }
+      { rootMargin: '0px 0px -150px 0px', threshold: 0.15 }
     );
 
-    if (sectionNode) {
-      observer.observe(sectionNode);
-    }
+    if (sectionNode) observer.observe(sectionNode);
 
     return () => {
-      if (sectionNode) {
-        observer.unobserve(sectionNode);
-      }
+      if (sectionNode) observer.unobserve(sectionNode);
       window.removeEventListener('scroll', handleScroll);
-      if (animationFrameId.current) {
-        cancelAnimationFrame(animationFrameId.current);
-      }
+      if (animationFrameId.current) cancelAnimationFrame(animationFrameId.current);
     };
   }, [minScale, maxScale]);
 
   return (
     <section className={styles.visualShowcase} ref={sectionRef}>
       <div className={styles.contentWrapper}>
+        <span className={styles.eyebrow}>Live Preview</span>
         <h2 className={styles.sectionTitle}>Your World, Beautifully Mapped</h2>
         <p className={styles.sectionSubtitle}>
           See your travel memories come alive as they are elegantly placed on a global canvas.
@@ -93,34 +77,34 @@ const VisualShowcaseSection: React.FC = () => {
       <div
         className={styles.mapContainer}
         ref={mapContainerRef}
-        style={{ transform: `scale(${currentScale})` }}
+        style={{ transform: `scale(${minScale})` }}
       >
         <Image
           src="/world_map.png"
           alt="World map silhouette"
-          layout="fill"
-          objectFit="contain"
+          fill
+          style={{ objectFit: 'contain' }}
           className={styles.mapImage}
-          quality={80}
+          quality={85}
         />
         <div className={`${styles.pinsOverlay} ${pinsShouldAnimate ? styles.animatePins : ''}`}>
           {showcasePins.map((pin, index) => (
             <div
               key={pin.id}
-              className={styles.photoPin} 
+              className={styles.photoPin}
               style={{
                 top: pin.top,
                 left: pin.left,
-                animationDelay: `${index * 0.2}s`, 
+                animationDelay: `${index * 0.18}s`,
               }}
             >
               <Image
                 src={pin.imgSrc}
                 alt={pin.caption}
-                width={80}
-                height={80}
+                width={99}
+                height={99}
                 className={styles.pinImage}
-                objectFit="cover"
+                style={{ objectFit: 'cover' }}
               />
               <span className={styles.pinCaption}>{pin.caption}</span>
             </div>
