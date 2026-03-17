@@ -43,3 +43,39 @@
   transform: translateY(-1px);
   text-decoration: none;
 }
+
+@media (max-width: 768px) {
+  .navbar {
+    padding: 0 1rem;
+    height: 60px;
+  }
+  .navbarBrand .brandLink {
+    font-size: 1.25rem;
+  }
+  .navbarMenu .navLinkButton {
+    background-color: transparent;
+    color: #1a73e8;
+    box-shadow: none;
+    padding: 0;
+    font-size: 1rem;
+  }
+  .navbarMenu .navLinkButton:hover {
+    background-color: transparent;
+    box-shadow: none;
+    transform: none;
+    text-decoration: underline;
+  }
+}
+
+@media (max-width: 480px) {
+  .navbar {
+    padding: 0 0.75rem;
+  }
+  .navbarBrand .brandLink {
+    font-size: 1.1rem;
+  }
+  .navbarMenu .navLinkButton {
+    font-size: 0.9rem;
+    padding: 0;
+  }
+}

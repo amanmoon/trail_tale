@@ -111,6 +111,23 @@ const VisualShowcaseSection: React.FC = () => {
           ))}
         </div>
       </div>
+      <div className={styles.mobileGallery}>
+        {showcasePins.map((pin) => (
+          <div key={`mobile-${pin.id}`} className={styles.mobileCard}>
+            <div className={styles.mobileCardImgWrapper}>
+              <Image
+                src={pin.imgSrc}
+                alt={pin.caption}
+                fill
+                sizes="(max-width: 768px) 240px, 100vw"
+                style={{ objectFit: 'cover' }}
+                className={styles.mobileCardImage}
+              />
+            </div>
+            <span className={styles.mobileCardCaption}>{pin.caption}</span>
+          </div>
+        ))}
+      </div>
     </section>
   );
 };
