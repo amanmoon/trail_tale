@@ -186,8 +186,8 @@
     background-color: #fff;
     border: none;
     border-radius: 50%; 
-    width: 40px;
-    height: 40px;
+    width: 44px;
+    height: 44px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -245,8 +245,8 @@
 
 .map-actions-overlay {
   position: absolute; 
-  top: 20px;          
-  right: 20px;         
+  top: 15px;          
+  right: 15px;         
   z-index: 1050;       
   display: flex;       
   flex-direction: column; 
@@ -290,4 +290,95 @@
   box-shadow: none;         
   cursor: not-allowed;
   transform: none;          
+}
+
+.location-picker-banner {
+    position: absolute;
+    bottom: 25px;
+    top: auto;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #ffffff;
+    color: #333333;
+    padding: 12px 20px;
+    border-radius: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    z-index: 2000;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-weight: 500;
+    width: 90%;
+    max-width: 400px;
+    justify-content: space-between;
+    border: 1px solid #eaeaea;
+}
+.location-picker-banner span {
+    font-size: 15px;
+}
+.location-picker-banner button {
+    background: #f1f3f4;
+    color: #444;
+    border: 1px solid #dcdcdc;
+    padding: 6px 14px;
+    border-radius: 16px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background 0.2s, box-shadow 0.2s;
+    font-size: 14px;
+}
+.location-picker-banner button:hover {
+    background: #e8eaed;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+@media (max-width: 768px) {
+  .location-picker-banner {
+    top: auto;
+    bottom: 25px; 
+  }
+  .country-search-container.google-maps-style {
+    top: 10px;
+    left: 10px;
+    right: 10px;
+    width: calc(100% - 20px);
+  }
+  .search-input-wrapper-gm {
+    min-width: unset;
+    max-width: none;
+    width: 100%;
+  }
+  .map-actions-overlay {
+    top: auto;
+    bottom: 20px;
+    right: 15px;
+  }
+  .add-new-image-button {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+    box-shadow: 0 6px 16px rgba(0,0,0,0.25), 0 4px 8px rgba(0,0,0,0.3);
+  }
+}
+
+@media (max-width: 480px) {
+  .country-search-container.google-maps-style {
+    top: 8px;
+    left: 8px;
+    right: 8px;
+    width: calc(100% - 16px);
+  }
+  .search-input-wrapper-gm {
+    height: 44px;
+  }
+  .add-new-image-button {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.22), 0 3px 6px rgba(0,0,0,0.28);
+  }
+  .map-actions-overlay {
+    bottom: 25px;
+    right: 20px;
+  }
 }

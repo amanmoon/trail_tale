@@ -13,7 +13,6 @@ async function convertFileToBase64(file: File): Promise<string> {
     });
 }
 
-const PLACEHOLDER_IMAGE_URL = 'https://via.placeholder.com/400x300?text=Cover+Not+Found';
 const THUMBNAIL_PLACEHOLDER_URL = 'https://via.placeholder.com/100x100?text=N/A';
 const MAX_PREVIEW_IMAGES_IN_DETAILS = 3;
 
@@ -305,10 +304,8 @@ export function ImageEditPanel({
                 <button className="close-button" onClick={onClose} aria-label="Close panel">&times;</button>
 
                 <div className="panel-content">
-                    {/* DISPLAY DETAILS VIEW */}
                     {panelView === 'displayDetails' && imageInfo && imageInfo.id !== "NEW_IMAGE_TEMP_ID" && (
                         <div className="panel-display-mode">
-                            {/* Cover, Title, Desc, Dates, Location */}
                             <div className="image-container">
                                 {displayModeCoverSrc ? (
                                     <img src={displayModeCoverSrc} alt={displayTitle} className="panel-image-large" />
@@ -322,7 +319,6 @@ export function ImageEditPanel({
                             <h1>{displayTitle}</h1> {displayDesc && <p className="description-text">{displayDesc}</p>}
                             <div className="details-group"> <p><strong>Date Created:</strong> {displayDateCreated}</p> <p><strong>Last Updated:</strong> {displayDateLastUpdated}</p> {imageInfo.country && <p><strong>Country:</strong> {imageInfo.country}</p>} </div>
 
-                            {/* External Images Snapshot */}
                             <div className="album-external-images-section">
                                 <>{imageInfo.images.slice(0, MAX_PREVIEW_IMAGES_IN_DETAILS).map(imgItem => (
                                     <div key={imgItem.id} className="external-image-item-wrapper">
@@ -336,7 +332,6 @@ export function ImageEditPanel({
                         </div>
                     )}
 
-                    {/* EDIT ALBUM DETAILS VIEW */}
                     {panelView === 'editDetails' && imageInfo && (
                         <div className="panel-edit-mode">
                             <div className="form-group form-image-preview-container">
@@ -373,7 +368,6 @@ export function ImageEditPanel({
                         </div>
                     )}
 
-                    {/* MANAGE INTERNAL IMAGES VIEW */}
                     {panelView === 'manageImages' && imageInfo && (
                         <div className="panel-manage-images-mode">
                             <div className="manage-images-header">
@@ -405,7 +399,7 @@ export function ImageEditPanel({
                                         hidden
                                         onChange={handleAddInternalImages}
                                         ref={internalImageUploadRef}
-                                        className="hidden-file-input" // Class to hide it
+                                        className="hidden-file-input"
                                     />
                                 </div>)}
                             <div className="edit-mode-internal-images">
@@ -424,10 +418,10 @@ export function ImageEditPanel({
                 </div> 
 
                 {panelView === 'displayDetails' && imageInfo && imageInfo.id !== "NEW_IMAGE_TEMP_ID" && (
-                    <>
+                    <div className="panel-actions">
                         <button type="button" onClick={() => handleDeleteInitiate()} className="delete-trash-button" aria-label="Delete Album" title="Delete Album"> <FaTrash /> </button>
                         <button type="button" onClick={switchToEditDetails} className="edit-pencil-button" aria-label="Edit Album Details" title="Edit Album Details"> <FaEdit /> </button>
-                    </>
+                    </div>
                 )}
 
                 {showDeleteConfirm && (

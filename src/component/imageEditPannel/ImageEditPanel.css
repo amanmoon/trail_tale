@@ -358,7 +358,7 @@
 }
 
 .panel-edit-mode .panel-actions button {
-    flex-grow: 1;
+    flex: 1;
     padding: 12px 15px;
     border: none;
     border-radius: 8px;
@@ -661,17 +661,17 @@ bottom: 25px;
 
 .add-images-custom-button { 
   position: absolute; 
-right: 24px;
-    bottom: 26px;
+    right: 4px;
+    bottom: 4px;
 
   background-color: #f8fbfc;
   
-  width: 50px;  
-  height: 50px; 
+  width: 56px;  
+  height: 56px; 
   border: none;
   border-radius: 50%; 
-  
-  font-size: 22px; 
+
+  font-size: 26px; 
   
   display: flex; 
   align-items: center;
@@ -846,4 +846,90 @@ right: 24px;
 .empty-cover-icon {
     font-size: 3em;
     margin-bottom: 10px;
+}
+
+@media (max-width: 768px) {
+  .slide-panel-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+  .slide-panel {
+    width: 100%;
+    height: 92vh;
+    border-radius: 24px 24px 0 0;
+    transform: translateY(100%) scale(1);
+  }
+  .slide-panel.open {
+    transform: translateY(0) scale(1);
+  }
+  .panel-content {
+    padding: 0 15px 15px 15px;
+  }
+  .panel-edit-mode .form-image-preview-container,
+  .panel-display-mode .image-container {
+    width: calc(100% + 30px);
+    margin-left: -15px;
+    margin-right: -15px;
+    height: 250px;
+  }
+  .add-images-custom-button,
+  .edit-pencil-button,
+  .delete-trash-button,
+  .delete-trash-button-internal {
+    width: 60px;
+    height: 60px;
+    font-size: 28px;
+  }
+  .delete-trash-button {
+    bottom: 20px;
+    right: 20px;
+  }
+  .edit-pencil-button {
+    bottom: 20px;
+    right: 88px;
+  }
+}
+
+@media (max-width: 480px) {
+  .panel-display-mode h1 {
+    font-size: 1.6em;
+  }
+  .panel-display-mode h3 {
+    font-size: 0.95em;
+  }
+  .confirm-delete-dialog {
+    padding: 20px;
+    width: 90%;
+  }
+  .add-images-custom-button {
+    bottom: 15px;
+    right: 15px;
+  }
+  .add-images-custom-button,
+  .edit-pencil-button,
+  .delete-trash-button,
+  .delete-trash-button-internal {
+    width: 56px;
+    height: 56px;
+    font-size: 24px;
+  }
+  .panel-edit-mode .panel-actions button {
+    padding: 10px 12px;
+    font-size: 0.9em;
+  }
+  .form-group input[type="text"],
+  .form-group input[type="url"],
+  .form-group textarea,
+  .form-group input[type="date"] {
+    padding: 10px 12px;
+  }
+  
+
+  .panel-edit-mode .form-image-preview-container {
+    height: 160px;
+  }
+  .coordinates-text {
+    flex-wrap: wrap;
+    font-size: 0.8em;
+  }
 }

@@ -39,7 +39,6 @@ const countrySpecificAdjustments: Record<string, { center?: [number, number]; zo
 const IMAGE_MARKER_DEBOUNCE_TIME = 250;
 const MAP_PICK_CURSOR_CLASS = 'leaflet-crosshair';
 
-// Helper to generate unique IDs (you should have a robust one in your utils)
 const generatePageUniqueId = (prefix: string = "id") => `${prefix}_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`;
 
 function debounce<F extends (...args: any[]) => any>(func: F, waitFor: number) {
@@ -203,6 +202,20 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
             }
         }
     }, [editingAlbum]);
+
+    const handleCancelPickLocation = useCallback(() => {
+        if (pickingLocationForAlbumIdRef.current === "NEW_IMAGE_TEMP_ID") {
+            setIsNewAlbumPanelOpen(true);
+        } else if (pickingLocationForAlbumIdRef.current) {
+            setIsEditPanelOpen(true);
+        }
+        setPickingLocationForAlbumId(null);
+        if (mapContainerRef.current) {
+            mapContainerRef.current.classList.remove(MAP_PICK_CURSOR_CLASS);
+            mapContainerRef.current.style.cursor = '';
+        }
+    }, []);
+
     const mapClickLogicHandler = useCallback((e: LeafletMouseEvent) => {
         const currentPickerId = pickingLocationForAlbumIdRef.current;
         if (currentPickerId && LRef.current) {
@@ -335,11 +348,20 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
             try {
                 L_instance = await import('leaflet');
                 LRef.current = L_instance;
+                const dynamicMinZoom = window.innerWidth <= 768 ? 2 : MIN_ZOOM;
+                const dynamicInitialZoom = window.innerWidth <= 768 ? 2.5 : INITIAL_ZOOM;
+
                 mapInstance = L_instance.map(mapContainerRef.current!, {
-                    center: MAP_CENTER, zoom: INITIAL_ZOOM, maxBounds: L_instance.latLngBounds(WORLD_BOUNDS),
-                    maxBoundsViscosity: MAX_BOUNDS_VISCOSITY, minZoom: MIN_ZOOM, maxZoom: MAX_ZOOM,
-                    zoomControl: false, worldCopyJump: true,
+                    center: MAP_CENTER, 
+                    zoom: dynamicInitialZoom, 
+                    minZoom: dynamicMinZoom, 
+                    maxZoom: MAX_ZOOM,
+                    zoomControl: false, 
+                    worldCopyJump: true,
                 });
+                
+                mapInstance.setMaxBounds([[-90, -Infinity], [90, Infinity]]);
+                mapInstance.options.maxBoundsViscosity = MAX_BOUNDS_VISCOSITY;
                 mapRef.current = mapInstance;
 
                 L_instance.tileLayer(TILE_LAYER_URL, { attribution: TILE_LAYER_ATTRIBUTION }).addTo(mapInstance);
@@ -509,6 +531,13 @@ export default function GalleryPage({ imagesData: initialAlbumsData }: GalleryPa
 
     return (
         <>
+            {pickingLocationForAlbumId && (
+                <div className="location-picker-banner">
+                    <span>Tap anywhere on the map to set location</span>
+                    <button onClick={handleCancelPickLocation}>Cancel</button>
+                </div>
+            )}
+
             <div ref={searchContainerRef} className="country-search-container google-maps-style">
                 <Link href="/" className="search-back-button-gm" aria-label="Clear search or go back"><FaArrowLeft /></Link>
                 <div className="search-input-wrapper-gm">

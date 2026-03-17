@@ -11,7 +11,7 @@ const Navbar = () => {
             </div>
             <div className="navbarMenu">
                 <Link href="/gallery" className="navLinkButton">
-                    Create Your Own Memory Wall
+                    Create Memory Wall
                 </Link>
             </div>
         </nav>

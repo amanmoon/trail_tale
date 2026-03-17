@@ -155,3 +155,12 @@
   .itemTitle { font-size: 1.25rem; }
   .itemDescription { font-size: 0.95rem; }
 }
+
+@media (max-width: 480px) {
+  .coreOffer { padding: 3rem 1rem; }
+  .sectionTitle { font-size: 1.8rem; }
+  .sectionSubtitle { font-size: 0.95rem; }
+  .offerGrid { gap: 1.25rem; }
+  .offerItem { padding: 1.5rem 1.25rem; }
+  .itemTitle { font-size: 1.15rem; }
+}

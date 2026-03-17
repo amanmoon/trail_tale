@@ -5,7 +5,6 @@
   overflow: hidden;
 }
 
-/* Decorative blobs — mirrors the hero section style */
 .benefitsSection::before {
   content: '';
   position: absolute;
@@ -148,4 +147,11 @@
   .benefitItem { padding: 1.75rem 1.5rem; }
   .itemTitle { font-size: 1.15rem; }
   .itemDescription { font-size: 0.93rem; }
+}
+
+@media (max-width: 480px) {
+  .benefitsSection { padding: 3rem 1rem; }
+  .sectionTitle { font-size: 1.6rem; }
+  .sectionSubtitle { font-size: 0.95rem; }
+  .benefitItem { padding: 1.5rem 1.25rem; }
 }

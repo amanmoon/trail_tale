@@ -9,7 +9,6 @@
   overflow: hidden;
 }
 
-/* Decorative blobs */
 .hero::before {
   content: '';
   position: absolute;
@@ -259,8 +258,8 @@
   .heroCta { justify-content: center; }
   .stats { justify-content: center; gap: 2rem; }
   .heroImageWrapper {
-    margin-top: 2rem;
-    min-height: 320px;
+    margin-top: 4rem;
+    min-height: 360px;
     animation: none;
     width: 100%;
     max-width: 440px;
@@ -270,4 +269,14 @@
   .headline { font-size: 2.6rem; }
   .ctaPrimary { font-size: 1rem; padding: 14px 28px; }
   .ctaSecondary { font-size: 0.95rem; padding: 13px 20px; }
+}
+
+@media (max-width: 480px) {
+  .hero { padding: 5rem 1rem 2.5rem; }
+  .headline { font-size: 2.2rem; }
+  .subHeadline { font-size: 1rem; }
+  .heroCta { flex-direction: column; width: 100%; gap: 1rem; }
+  .ctaPrimary, .ctaSecondary { width: 100%; justify-content: center; }
+  .stats { flex-direction: column; gap: 1.5rem; }
+  .heroImageWrapper { min-height: 280px; }
 }
